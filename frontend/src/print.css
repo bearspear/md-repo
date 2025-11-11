@@ -1,0 +1,390 @@
+/* ========================================
+   Print Stylesheet for Markdown Reader
+   ======================================== */
+
+/* Reset and Basic Print Settings */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  @page {
+    margin: 2cm 2cm 2cm 2cm;
+    size: A4;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  /* Hide UI Elements */
+  mat-toolbar,
+  .search-section,
+  .search-container,
+  .filters-section,
+  .sidebar,
+  .search-results,
+  .favorites-panel,
+  .recent-panel,
+  .index-panel,
+  .editor-toolbar,
+  .annotation-panel,
+  .annotation-sidebar,
+  button,
+  .mat-mdc-fab,
+  .mat-mdc-mini-fab,
+  .mat-mdc-raised-button,
+  .mat-mdc-button,
+  .mat-mdc-icon-button,
+  .document-actions,
+  .document-toolbar,
+  .document-header button,
+  .toolbar,
+  nav,
+  .navigation,
+  .stats,
+  .badge,
+  .search-help-panel,
+  .search-history-dropdown,
+  .saved-searches-panel,
+  .filter-content,
+  .upload-dialog,
+  .settings-dialog,
+  mat-dialog-container,
+  .cdk-overlay-container,
+  .mat-drawer,
+  .mat-sidenav,
+  .save-status,
+  .toolbar-spacer,
+  [matTooltip] {
+    display: none !important;
+  }
+
+  /* Container Adjustments */
+  .container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Document Modal - Remove backdrop during print */
+  .document-modal {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    position: static !important;
+    padding: 0 !important;
+  }
+
+  /* Document View - Full Width */
+  .document-viewer {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .document-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Document Header - Minimal */
+  .document-header {
+    margin-bottom: 1.5em;
+    padding-bottom: 0.5em;
+    border-bottom: 2px solid #333;
+  }
+
+  .document-title {
+    font-size: 20pt;
+    font-weight: bold;
+    color: black !important;
+    margin: 0 0 0.5em 0;
+  }
+
+  .document-meta {
+    font-size: 9pt;
+    color: #666 !important;
+    margin: 0.5em 0;
+  }
+
+  .document-meta .meta-item {
+    display: inline-block;
+    margin-right: 1em;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+    color: black !important;
+    font-weight: bold;
+  }
+
+  h1 {
+    font-size: 18pt;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+  }
+
+  h2 {
+    font-size: 16pt;
+    margin-top: 1.2em;
+    margin-bottom: 0.4em;
+  }
+
+  h3 {
+    font-size: 14pt;
+    margin-top: 1em;
+    margin-bottom: 0.3em;
+  }
+
+  h4 {
+    font-size: 13pt;
+    margin-top: 0.8em;
+    margin-bottom: 0.2em;
+  }
+
+  h5, h6 {
+    font-size: 12pt;
+    margin-top: 0.6em;
+    margin-bottom: 0.2em;
+  }
+
+  p {
+    margin: 0.5em 0 1em 0;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Lists */
+  ul, ol {
+    margin: 0.5em 0 1em 1.5em;
+    padding-left: 1em;
+  }
+
+  li {
+    margin: 0.3em 0;
+    orphans: 2;
+    widows: 2;
+  }
+
+  /* Code Blocks */
+  pre {
+    page-break-inside: avoid;
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd !important;
+    padding: 10pt !important;
+    margin: 1em 0;
+    font-size: 9pt;
+    line-height: 1.4;
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+  }
+
+  code {
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd !important;
+    padding: 2pt 4pt;
+    font-size: 10pt;
+    font-family: 'Courier New', monospace;
+  }
+
+  pre code {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+  }
+
+  /* Blockquotes */
+  blockquote {
+    page-break-inside: avoid;
+    border-left: 3px solid #333 !important;
+    margin: 1em 0;
+    padding: 0.5em 0 0.5em 1em;
+    color: #444 !important;
+    background: #f9f9f9 !important;
+  }
+
+  /* Tables */
+  table {
+    page-break-inside: avoid;
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    font-size: 10pt;
+  }
+
+  th, td {
+    border: 1px solid #333 !important;
+    padding: 6pt;
+    text-align: left;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    font-weight: bold;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* Images */
+  img {
+    max-width: 100%;
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* Links */
+  a {
+    color: black !important;
+    text-decoration: underline;
+  }
+
+  /* Show URL after links */
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666 !important;
+    word-break: break-all;
+  }
+
+  /* Don't show URLs for anchor links */
+  a[href^="#"]:after {
+    content: "";
+  }
+
+  /* Horizontal Rules */
+  hr {
+    border: none;
+    border-top: 2px solid #333 !important;
+    margin: 1.5em 0;
+    page-break-after: avoid;
+  }
+
+  /* Page Breaks */
+  .page-break,
+  .pagebreak {
+    page-break-before: always;
+  }
+
+  /* Prevent page breaks */
+  .no-break,
+  .keep-together {
+    page-break-inside: avoid;
+  }
+
+  /* Tags and Metadata (minimal) */
+  .tag,
+  .topic-chip,
+  .mat-chip,
+  .mat-mdc-chip {
+    display: inline;
+    background: transparent !important;
+    border: 1px solid #333 !important;
+    padding: 2pt 4pt;
+    margin: 0 4pt 4pt 0;
+    font-size: 9pt;
+    color: black !important;
+  }
+
+  /* Remove shadows and effects */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Editor mode - hide editor, show content */
+  .editor-container {
+    display: none !important;
+  }
+
+  .document-content.editor-mode {
+    display: block !important;
+  }
+
+  /* Annotations - minimal display */
+  .annotation {
+    background: transparent !important;
+    border-bottom: 2px solid #333 !important;
+    color: black !important;
+  }
+
+  /* Hide annotation UI elements */
+  .annotation-controls,
+  .annotation-form {
+    display: none !important;
+  }
+
+  /* Footer with page numbers (if using @page) */
+  @page {
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-size: 9pt;
+      color: #666;
+    }
+  }
+
+  /* Document path/title in header */
+  .document-path {
+    font-size: 9pt;
+    color: #666 !important;
+    margin-bottom: 0.5em;
+  }
+
+  /* Prevent orphans and widows */
+  h1, h2, h3, h4, h5, h6 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Markdown-specific elements */
+  .markdown-body {
+    color: black !important;
+    background: white !important;
+  }
+
+  /* Task lists */
+  input[type="checkbox"] {
+    -webkit-appearance: checkbox;
+    appearance: checkbox;
+  }
+
+  /* Hide Material Design overlays */
+  .cdk-overlay-backdrop,
+  .cdk-overlay-pane {
+    display: none !important;
+  }
+
+  /* Ensure visible content is black on white */
+  .visible-print {
+    display: block !important;
+  }
+
+  .hidden-print {
+    display: none !important;
+  }
+}

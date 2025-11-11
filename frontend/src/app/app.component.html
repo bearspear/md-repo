@@ -1,0 +1,926 @@
+<mat-toolbar color="primary">
+  <span>{{ title }}</span>
+  <span class="spacer"></span>
+  <span class="stats">{{ totalDocuments }} docs | {{ totalWords }} words</span>
+  <button mat-icon-button (click)="toggleIndex()" matTooltip="Document Index" [class.active]="showIndex">
+    <mat-icon>menu_book</mat-icon>
+  </button>
+  <button mat-icon-button (click)="showCollections = !showCollections" matTooltip="Collections" [class.active]="showCollections">
+    <mat-icon>folder</mat-icon>
+  </button>
+  <button mat-icon-button (click)="showFavorites = !showFavorites" matTooltip="Favorites" [class.active]="showFavorites">
+    <mat-icon>star</mat-icon>
+    <span class="badge" *ngIf="favorites.length > 0">{{ favorites.length }}</span>
+  </button>
+  <button mat-icon-button (click)="showRecent = !showRecent" matTooltip="Recent Documents" [class.active]="showRecent">
+    <mat-icon>history</mat-icon>
+    <span class="badge" *ngIf="recentDocuments.length > 0">{{ recentDocuments.length }}</span>
+  </button>
+  <button mat-icon-button (click)="showUploadDialog = true" matTooltip="Upload Documents">
+    <mat-icon>upload_file</mat-icon>
+  </button>
+  <button mat-icon-button (click)="openSettingsDialog()" matTooltip="Settings">
+    <mat-icon>settings</mat-icon>
+  </button>
+</mat-toolbar>
+
+<div class="container">
+  <!-- Search Section -->
+  <div class="search-section">
+    <h1>🔍 Search Your Markdown</h1>
+    <div class="search-container">
+      <mat-form-field class="search-field" appearance="outline">
+        <mat-label>Search documents...</mat-label>
+        <input matInput
+               #searchInput
+               [(ngModel)]="searchQuery"
+               (input)="onSearchInput(searchInput.value)"
+               (focus)="onSearchFocus()"
+               (blur)="onSearchBlur()"
+               placeholder="Try: angular, search, database..."
+               autofocus>
+        <button mat-icon-button matSuffix (click)="showSearchHelp = !showSearchHelp" matTooltip="Search Help">
+          <mat-icon>help_outline</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Search History Dropdown -->
+      <div *ngIf="showSearchHistory && searchHistory.length > 0" class="search-history-dropdown">
+        <div class="search-history-header">
+          <span>Recent Searches</span>
+          <button mat-button (click)="clearSearchHistory()" class="clear-history-btn">
+            <mat-icon>clear_all</mat-icon>
+            Clear
+          </button>
+        </div>
+        <div class="search-history-items">
+          <button *ngFor="let item of searchHistory"
+                  class="search-history-item"
+                  (click)="useSearchHistory(item)">
+            <mat-icon>history</mat-icon>
+            <span>{{ item }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Help Panel -->
+      <div *ngIf="showSearchHelp" class="search-help-panel">
+        <div class="search-help-header">
+          <h3>Advanced Search Syntax</h3>
+          <button mat-icon-button (click)="showSearchHelp = false" class="close-help-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="search-help-content">
+          <div class="help-section">
+            <h4>Boolean Operators</h4>
+            <ul>
+              <li><code>angular AND typescript</code> - Both words must appear</li>
+              <li><code>react OR vue</code> - Either word must appear</li>
+              <li><code>javascript NOT framework</code> - Exclude documents with "framework"</li>
+              <li><code>+required -excluded</code> - Shorthand for AND/NOT</li>
+            </ul>
+          </div>
+
+          <div class="help-section">
+            <h4>Phrase Search</h4>
+            <ul>
+              <li><code>"exact phrase"</code> - Match exact phrase</li>
+              <li><code>"machine learning"</code> - Words in exact order</li>
+            </ul>
+          </div>
+
+          <div class="help-section">
+            <h4>Wildcard & Prefix</h4>
+            <ul>
+              <li><code>java*</code> - Matches java, javascript, javadoc, etc.</li>
+              <li><code>test*</code> - Matches test, testing, tests, etc.</li>
+            </ul>
+          </div>
+
+          <div class="help-section">
+            <h4>Field Search</h4>
+            <ul>
+              <li><code>title:angular</code> - Search only in title</li>
+              <li><code>content:api</code> - Search only in content</li>
+            </ul>
+          </div>
+
+          <div class="help-section">
+            <h4>Examples</h4>
+            <ul>
+              <li><code>angular AND typescript</code></li>
+              <li><code>"API design" NOT deprecated</code></li>
+              <li><code>react* OR vue*</code></li>
+              <li><code>title:"getting started"</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Advanced Filters Section -->
+    <div class="filters-section">
+      <div class="filter-header">
+        <button mat-stroked-button (click)="showAdvancedFilters = !showAdvancedFilters" class="filter-toggle">
+          <mat-icon>{{showAdvancedFilters ? 'expand_less' : 'filter_list'}}</mat-icon>
+          Advanced Filters
+          <span *ngIf="hasActiveFilters()" class="filter-count">Active</span>
+        </button>
+
+        <div class="filter-actions-inline">
+          <button mat-button (click)="showSavedSearches = !showSavedSearches" *ngIf="savedSearches.length > 0">
+            <mat-icon>bookmark</mat-icon>
+            Saved Searches ({{savedSearches.length}})
+          </button>
+          <button mat-button (click)="clearFilters()" *ngIf="hasActiveFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Saved Searches Panel -->
+      <div *ngIf="showSavedSearches" class="saved-searches-panel">
+        <div class="saved-search-item" *ngFor="let search of savedSearches; let i = index">
+          <button mat-button (click)="applySavedSearch(search)" class="saved-search-btn">
+            <mat-icon>bookmark</mat-icon>
+            <span>{{ search.name }}</span>
+            <small>{{ search.query }}</small>
+          </button>
+          <button mat-icon-button (click)="deleteSavedSearch(i)" matTooltip="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="showAdvancedFilters" class="filter-content">
+        <!-- Date Range Filter -->
+        <div class="filter-group">
+          <h4>Date Range</h4>
+          <div class="date-range-inputs">
+            <mat-form-field appearance="outline">
+              <mat-label>From</mat-label>
+              <input matInput [matDatepicker]="pickerFrom" [(ngModel)]="dateFrom" (dateChange)="onDateFilterChange()">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFrom></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>To</mat-label>
+              <input matInput [matDatepicker]="pickerTo" [(ngModel)]="dateTo" (dateChange)="onDateFilterChange()">
+              <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+              <mat-datepicker #pickerTo></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Content Type Filter -->
+        <div class="filter-group">
+          <h4>Content Type</h4>
+          <mat-form-field appearance="outline">
+            <mat-label>Select content type</mat-label>
+            <mat-select [(ngModel)]="selectedContentType" (selectionChange)="onContentTypeChange()">
+              <mat-option value="">All Types</mat-option>
+              <mat-option value="markdown">Markdown</mat-option>
+              <mat-option value="note">Note</mat-option>
+              <mat-option value="documentation">Documentation</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Topics Filter -->
+        <div class="filter-group" *ngIf="availableTopics.length > 0">
+          <h4>Topics <span *ngIf="selectedTopics.length > 0">({{selectedTopics.length}} selected)</span></h4>
+          <mat-chip-set>
+            <mat-chip
+              *ngFor="let topic of availableTopics"
+              (click)="toggleTopic(topic.name)"
+              [class.selected]="isTopicSelected(topic.name)"
+              class="filter-chip">
+              {{ topic.name }} ({{ topic.count }})
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <!-- Tags Filter -->
+        <div class="filter-group" *ngIf="availableTags.length > 0">
+          <h4>Tags <span *ngIf="selectedTags.length > 0">({{selectedTags.length}} selected)</span></h4>
+          <mat-chip-set>
+            <mat-chip
+              *ngFor="let tag of availableTags"
+              (click)="toggleTag(tag.name)"
+              [class.selected]="isTagSelected(tag.name)"
+              class="filter-chip">
+              {{ tag.name }} ({{ tag.count }})
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <!-- Save Search Button -->
+        <div class="filter-group" *ngIf="searchQuery && hasSearched">
+          <button mat-raised-button color="accent" (click)="promptAndSaveSearch()">
+            <mat-icon>bookmark_add</mat-icon>
+            Save This Search
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Collections Panel -->
+    <div class="collections-panel" *ngIf="showCollections">
+      <div class="panel-header">
+        <h3>
+          <mat-icon>folder</mat-icon>
+          Collections
+        </h3>
+        <button mat-button (click)="showCollections = false">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="panel-content">
+        <app-collections-sidebar
+          (createCollection)="onCreateCollection()"
+          (editCollection)="onEditCollection($event)"
+          (deleteCollection)="onDeleteCollection($event)"
+          (collectionSelected)="onCollectionSelected($event)">
+        </app-collections-sidebar>
+      </div>
+    </div>
+
+    <!-- Favorites Panel -->
+    <div class="favorites-panel" *ngIf="showFavorites && favorites.length > 0">
+      <div class="panel-header">
+        <h3>
+          <mat-icon>star</mat-icon>
+          Favorites ({{ favorites.length }})
+        </h3>
+        <button mat-button (click)="showFavorites = false">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="panel-content">
+        <div *ngFor="let favPath of favorites" class="favorite-item">
+          <div class="favorite-info">
+            <span class="favorite-title">{{ favPath.split('/').pop() }}</span>
+            <span class="favorite-path">{{ favPath }}</span>
+          </div>
+          <button mat-icon-button (click)="toggleFavorite(favPath)" matTooltip="Remove from favorites">
+            <mat-icon>star</mat-icon>
+          </button>
+        </div>
+        <p *ngIf="favorites.length === 0" class="empty-state">No favorites yet. Star documents to save them here!</p>
+      </div>
+    </div>
+
+    <!-- Recent Documents Panel -->
+    <div class="recent-panel" *ngIf="showRecent && recentDocuments.length > 0">
+      <div class="panel-header">
+        <h3>
+          <mat-icon>history</mat-icon>
+          Recent Documents ({{ recentDocuments.length }})
+        </h3>
+        <div>
+          <button mat-button (click)="clearRecentDocuments()" *ngIf="recentDocuments.length > 0">
+            Clear All
+          </button>
+          <button mat-button (click)="showRecent = false">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div class="panel-content">
+        <div *ngFor="let doc of recentDocuments" class="recent-item" (click)="openRecentDocument(doc)">
+          <div class="recent-info">
+            <span class="recent-title">{{ doc.title }}</span>
+            <span class="recent-meta">{{ doc.path }} · {{ formatDate(doc.viewedAt) }}</span>
+          </div>
+          <div class="recent-topics" *ngIf="doc.topics.length > 0">
+            <mat-chip *ngFor="let topic of doc.topics.slice(0, 3)">{{ topic }}</mat-chip>
+          </div>
+        </div>
+        <p *ngIf="recentDocuments.length === 0" class="empty-state">No recent documents yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isSearching" class="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+
+  <!-- Search Results -->
+  <div *ngIf="!isSearching && hasSearched" class="results-section">
+    <div *ngIf="searchResults.length > 0" class="results-header">
+      <h2>
+        Found {{ searchResults.length }} results for "{{ searchQuery }}"
+      </h2>
+      <div class="results-export">
+        <button mat-stroked-button (click)="exportSearchResults('json')" matTooltip="Export results as JSON">
+          <mat-icon>download</mat-icon>
+          JSON
+        </button>
+        <button mat-stroked-button (click)="exportSearchResults('csv')" matTooltip="Export results as CSV">
+          <mat-icon>download</mat-icon>
+          CSV
+        </button>
+      </div>
+    </div>
+    <div *ngIf="searchResults.length === 0" class="no-results">
+      <mat-icon class="no-results-icon">search_off</mat-icon>
+      <h3>No results found</h3>
+      <p>No documents match "{{ searchQuery }}"</p>
+      <div class="suggestions">
+        <p><strong>Try:</strong></p>
+        <ul>
+          <li>Using different keywords</li>
+          <li>Clearing active filters</li>
+          <li>Uploading more documents</li>
+        </ul>
+      </div>
+    </div>
+
+    <mat-card *ngFor="let result of searchResults" class="result-card">
+      <button mat-icon-button class="favorite-btn" (click)="$event.stopPropagation(); toggleFavorite(result.path)" [class.is-favorite]="isFavorite(result.path)">
+        <mat-icon>{{ isFavorite(result.path) ? 'star' : 'star_border' }}</mat-icon>
+      </button>
+      <button mat-icon-button class="collection-btn" (click)="$event.stopPropagation(); openDocumentCollectionsDialog(result)" matTooltip="Add to Collection">
+        <mat-icon>folder_open</mat-icon>
+      </button>
+      <div (click)="openDocument(result)">
+        <mat-card-header>
+          <mat-card-title>{{ result.title }}</mat-card-title>
+          <mat-card-subtitle>{{ result.path }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="snippet" [innerHTML]="result.snippet"></div>
+          <div class="metadata">
+            <span class="word-count">{{ result.wordCount }} words</span>
+            <span class="date">{{ formatDate(result.modifiedAt) }}</span>
+          </div>
+          <div class="tags" *ngIf="result.topics.length > 0">
+            <mat-chip-set>
+              <mat-chip *ngFor="let topic of result.topics.slice(0, 5)">
+                {{ topic }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+          <div class="collection-badges" *ngIf="result.collections && result.collections.length > 0">
+            <div *ngFor="let collection of result.collections" class="collection-badge" [matTooltip]="collection.name">
+              <div class="collection-badge-color" [style.background-color]="collection.color"></div>
+              <span class="collection-badge-name">{{ collection.name }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- Welcome Message -->
+  <div *ngIf="!hasSearched && !showIndex" class="welcome">
+    <h2>Welcome to Markdown Reader</h2>
+    <p>Start searching to find your markdown documents instantly.</p>
+    <p class="feature-list">
+      ✨ Full-text search across all documents<br>
+      ⚡ Instant results with highlighted snippets<br>
+      🏷️ Auto-tagged with topics and keywords<br>
+      📖 Beautiful markdown rendering
+    </p>
+    <div class="keyboard-hints">
+      <p><strong>Keyboard Shortcuts:</strong></p>
+      <p>
+        <kbd>/</kbd> Focus search ·
+        <kbd>Esc</kbd> Close dialogs
+      </p>
+    </div>
+  </div>
+
+  <!-- Document Index -->
+  <div *ngIf="showIndex" class="index-page">
+    <div class="index-header">
+      <h2>
+        <mat-icon>menu_book</mat-icon>
+        Document Index
+      </h2>
+      <p class="index-subtitle">{{ allDocuments.length }} documents organized alphabetically</p>
+    </div>
+
+    <div class="index-content">
+      <div *ngFor="let letter of alphabetSections" class="index-section">
+        <h3 class="index-letter">{{ letter }}</h3>
+        <div class="index-documents">
+          <div *ngFor="let doc of groupedDocuments[letter]"
+               class="index-document-item"
+               (click)="openDocumentFromIndex(doc)">
+            <div class="index-doc-info">
+              <div class="index-doc-title">{{ doc.title }}</div>
+              <div class="index-doc-path">{{ doc.path }}</div>
+            </div>
+            <div class="index-doc-meta">
+              <span class="index-doc-words">{{ doc.wordCount }} words</span>
+              <button mat-icon-button
+                      (click)="$event.stopPropagation(); toggleFavorite(doc.path)"
+                      [class.is-favorite]="isFavorite(doc.path)"
+                      matTooltip="Toggle favorite">
+                <mat-icon>{{ isFavorite(doc.path) ? 'star' : 'star_border' }}</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Document Viewer Modal -->
+<div *ngIf="selectedDocument" class="document-modal" [class.fullscreen]="isFullscreen" (click)="closeDocument()">
+  <div class="document-viewer" (click)="$event.stopPropagation()">
+    <div class="document-header">
+      <div class="document-title-section">
+        <h2>{{ selectedDocument.title }}</h2>
+        <span class="document-path">{{ selectedDocument.path }}</span>
+      </div>
+      <div class="document-actions">
+        <button mat-icon-button (click)="toggleEditMode()" [matTooltip]="isEditMode ? 'Exit Edit Mode' : 'Edit Document'" [class.active]="isEditMode">
+          <mat-icon>{{ isEditMode ? 'visibility' : 'edit' }}</mat-icon>
+        </button>
+        <button mat-icon-button (click)="cyclePreviewMode()" [matTooltip]="'Preview: ' + (previewMode === 'editor' ? 'Editor Only' : previewMode === 'split' ? 'Split View' : 'Preview Only')" *ngIf="isEditMode">
+          <mat-icon>{{ previewMode === 'editor' ? 'code' : previewMode === 'split' ? 'view_column' : 'visibility' }}</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Annotations" [class.active]="annotations.length > 0" *ngIf="!isEditMode">
+          <mat-icon>highlight</mat-icon>
+          <span class="badge" *ngIf="annotations.length > 0">{{ annotations.length }}</span>
+        </button>
+        <button mat-icon-button (click)="toggleToc()" matTooltip="Toggle Table of Contents" *ngIf="documentToc.length > 0 && !isEditMode">
+          <mat-icon>{{ showToc ? 'menu_open' : 'menu' }}</mat-icon>
+        </button>
+        <button mat-icon-button (click)="copyMarkdown()" matTooltip="Copy Markdown">
+          <mat-icon>{{ copySuccess ? 'check' : 'content_copy' }}</mat-icon>
+        </button>
+        <button mat-icon-button (click)="printDocument()" matTooltip="Print">
+          <mat-icon>print</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleFullscreen()" matTooltip="Toggle Fullscreen">
+          <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+        </button>
+        <button mat-icon-button (click)="closeDocument()" matTooltip="Close">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="document-body">
+      <!-- Table of Contents -->
+      <aside class="document-toc" *ngIf="documentToc.length > 0 && showToc">
+        <h3>Table of Contents</h3>
+        <nav>
+          <ul class="toc-list">
+            <li *ngFor="let item of documentToc"
+                [class.toc-level-1]="item.level === 1"
+                [class.toc-level-2]="item.level === 2"
+                [class.toc-level-3]="item.level === 3"
+                [class.toc-level-4]="item.level === 4"
+                [class.toc-level-5]="item.level === 5"
+                [class.toc-level-6]="item.level === 6">
+              <a (click)="scrollToSection(item.id)">{{ item.text }}</a>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Document Content -->
+      <div class="document-content"
+           #documentContent
+           [class.with-toc]="documentToc.length > 0 && showToc && !isEditMode"
+           [class.editor-mode]="isEditMode">
+
+        <!-- Editor Mode -->
+        <div *ngIf="isEditMode" class="editor-container" [class.split-view]="previewMode === 'split'">
+          <!-- Markdown Toolbar -->
+          <div class="editor-toolbar">
+            <button mat-icon-button (click)="insertMarkdown('bold')" matTooltip="Bold">
+              <mat-icon>format_bold</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('italic')" matTooltip="Italic">
+              <mat-icon>format_italic</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('heading')" matTooltip="Heading">
+              <mat-icon>title</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('link')" matTooltip="Link">
+              <mat-icon>link</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('code')" matTooltip="Code">
+              <mat-icon>code</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('list')" matTooltip="List">
+              <mat-icon>format_list_bulleted</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('strikethrough')" matTooltip="Strikethrough">
+              <mat-icon>format_strikethrough</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('blockquote')" matTooltip="Blockquote">
+              <mat-icon>format_quote</mat-icon>
+            </button>
+
+            <mat-divider [vertical]="true" style="height: 24px; margin: 0 8px;"></mat-divider>
+
+            <button mat-icon-button (click)="insertMarkdown('table')" matTooltip="Table">
+              <mat-icon>table_chart</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('image')" matTooltip="Image">
+              <mat-icon>image</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('hr')" matTooltip="Horizontal Rule">
+              <mat-icon>horizontal_rule</mat-icon>
+            </button>
+            <button mat-icon-button (click)="insertMarkdown('task')" matTooltip="Task List">
+              <mat-icon>check_box</mat-icon>
+            </button>
+
+            <mat-divider [vertical]="true" style="height: 24px; margin: 0 8px;"></mat-divider>
+
+            <button mat-icon-button (click)="toggleFindReplace()" matTooltip="Find & Replace (Ctrl+F)">
+              <mat-icon>search</mat-icon>
+            </button>
+            <button mat-icon-button (click)="showKeyboardShortcuts()" matTooltip="Keyboard Shortcuts">
+              <mat-icon>keyboard</mat-icon>
+            </button>
+
+            <span class="toolbar-spacer"></span>
+
+            <!-- Save Status -->
+            <span class="save-status">
+              <mat-icon *ngIf="isSaving">hourglass_empty</mat-icon>
+              <mat-icon *ngIf="!isSaving && !hasUnsavedChanges && lastSavedAt">check_circle</mat-icon>
+              <mat-icon *ngIf="hasUnsavedChanges && !isSaving">edit</mat-icon>
+              <span *ngIf="isSaving">Saving...</span>
+              <span *ngIf="!isSaving && !hasUnsavedChanges && lastSavedAt">
+                Saved {{ lastSavedAt | date:'short' }}
+              </span>
+              <span *ngIf="hasUnsavedChanges && !isSaving">Unsaved changes</span>
+            </span>
+
+            <button mat-stroked-button (click)="discardChanges()" [disabled]="!hasUnsavedChanges">
+              Discard
+            </button>
+            <button mat-raised-button color="primary" (click)="saveDocument()" [disabled]="!hasUnsavedChanges || isSaving">
+              Save
+            </button>
+          </div>
+
+          <!-- Find & Replace Panel -->
+          <div class="find-replace-panel" *ngIf="showFindReplace">
+            <div class="find-replace-row">
+              <mat-icon class="find-icon">search</mat-icon>
+              <input
+                type="text"
+                class="find-input"
+                [(ngModel)]="findText"
+                placeholder="Find"
+                (keydown.enter)="findNext()"
+                (keydown.escape)="toggleFindReplace()"
+                #findInput>
+              <button mat-icon-button (click)="findPrevious()" matTooltip="Previous (Shift+Enter)">
+                <mat-icon>keyboard_arrow_up</mat-icon>
+              </button>
+              <button mat-icon-button (click)="findNext()" matTooltip="Next (Enter)">
+                <mat-icon>keyboard_arrow_down</mat-icon>
+              </button>
+              <span class="find-count" *ngIf="findText">{{ currentMatchIndex + 1 }} of {{ totalMatches }}</span>
+              <button mat-icon-button (click)="toggleFindReplace()" matTooltip="Close (Esc)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <div class="replace-row" *ngIf="showReplace">
+              <mat-icon class="replace-icon">find_replace</mat-icon>
+              <input
+                type="text"
+                class="replace-input"
+                [(ngModel)]="replaceText"
+                placeholder="Replace"
+                (keydown.enter)="replaceNext()"
+                (keydown.escape)="toggleFindReplace()">
+              <button mat-button (click)="replaceNext()">Replace</button>
+              <button mat-button (click)="replaceAll()">Replace All</button>
+            </div>
+          </div>
+
+          <!-- Split View Container -->
+          <div class="editor-split-container">
+            <!-- Editor Panel -->
+            <div class="editor-panel" *ngIf="previewMode === 'editor' || previewMode === 'split'">
+              <!-- Markdown Editor -->
+              <textarea
+                class="editor-textarea"
+                [(ngModel)]="editedContent"
+                (input)="onContentChange()"
+                placeholder="Edit markdown content here...">
+              </textarea>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="preview-panel" *ngIf="previewMode === 'preview' || previewMode === 'split'">
+              <div class="preview-content">
+                <markdown [data]="editedContent"></markdown>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- View Mode -->
+        <div *ngIf="!isEditMode" (mouseup)="onTextSelection()">
+          <markdown [data]="selectedDocument.rawContent"></markdown>
+        </div>
+
+        <!-- Annotations List -->
+        <div class="annotations-section" *ngIf="annotations.length > 0">
+          <mat-divider style="margin: 3rem 0 2rem 0;"></mat-divider>
+          <div class="annotations-header">
+            <h3>
+              <mat-icon>highlight</mat-icon>
+              Annotations ({{ annotations.length }})
+            </h3>
+            <div class="annotations-export">
+              <button mat-stroked-button (click)="exportAnnotationsAsJSON()" matTooltip="Export as JSON">
+                <mat-icon>download</mat-icon>
+                JSON
+              </button>
+              <button mat-stroked-button (click)="exportAnnotationsAsCSV()" matTooltip="Export as CSV">
+                <mat-icon>download</mat-icon>
+                CSV
+              </button>
+            </div>
+          </div>
+          <div class="annotations-list">
+            <div *ngFor="let annotation of annotations"
+                 class="annotation-item"
+                 [style.border-left-color]="getColorStyle(annotation.color)">
+              <div class="annotation-header">
+                <div class="annotation-color" [style.background-color]="getColorStyle(annotation.color)"></div>
+                <div class="annotation-text">{{ annotation.selectedText }}</div>
+                <div class="annotation-actions">
+                  <button mat-icon-button (click)="editAnnotation(annotation)" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="deleteAnnotation(annotation)" matTooltip="Delete">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+              <div class="annotation-note" *ngIf="annotation.note">
+                {{ annotation.note }}
+              </div>
+              <div class="annotation-meta">
+                {{ formatDate(annotation.createdAt) }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Documents -->
+        <div class="related-documents" *ngIf="relatedDocuments.length > 0">
+          <mat-divider style="margin: 3rem 0 2rem 0;"></mat-divider>
+          <h3>
+            <mat-icon>link</mat-icon>
+            Related Documents
+          </h3>
+          <div class="related-list">
+            <div *ngFor="let related of relatedDocuments" class="related-item" (click)="closeDocument(); openDocument(related)">
+              <div class="related-info">
+                <span class="related-title">{{ related.title }}</span>
+                <span class="related-path">{{ related.path }}</span>
+              </div>
+              <div class="related-topics">
+                <mat-chip *ngFor="let topic of related.topics.slice(0, 3)">{{ topic }}</mat-chip>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Annotation Dialog -->
+<div *ngIf="showAnnotationDialog" class="document-modal" (click)="closeAnnotationDialog()">
+  <div class="annotation-dialog" (click)="$event.stopPropagation()">
+    <div class="document-header">
+      <h2>{{ editingAnnotation ? 'Edit' : 'Add' }} Annotation</h2>
+      <button mat-icon-button (click)="closeAnnotationDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="annotation-content">
+      <div class="selected-text-preview">
+        <strong>Selected Text:</strong>
+        <p>{{ selectedText }}</p>
+      </div>
+
+      <div class="color-picker">
+        <label>Highlight Color:</label>
+        <div class="color-options">
+          <button *ngFor="let colorOption of availableColors"
+                  class="color-option"
+                  [class.selected]="currentAnnotation.color === colorOption.value"
+                  [style.background-color]="colorOption.color"
+                  (click)="currentAnnotation.color = colorOption.value"
+                  [matTooltip]="colorOption.name">
+          </button>
+        </div>
+      </div>
+
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Note (optional)</mat-label>
+        <textarea matInput
+                  [(ngModel)]="currentAnnotation.note"
+                  placeholder="Add your notes here..."
+                  rows="4"></textarea>
+      </mat-form-field>
+
+      <div class="annotation-actions-footer">
+        <button mat-button (click)="closeAnnotationDialog()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="saveAnnotation()">
+          <mat-icon>{{ editingAnnotation ? 'save' : 'add' }}</mat-icon>
+          {{ editingAnnotation ? 'Update' : 'Save' }} Annotation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Dialog -->
+<div *ngIf="showUploadDialog" class="document-modal" (click)="closeUploadDialog()">
+  <div class="upload-dialog" (click)="$event.stopPropagation()">
+    <div class="document-header">
+      <h2>Upload Markdown Files</h2>
+      <button mat-icon-button (click)="closeUploadDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="upload-content">
+      <div
+        class="drop-zone"
+        [class.drag-over]="dragOver"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+        <mat-icon class="upload-icon">cloud_upload</mat-icon>
+        <h3>Drag & Drop .md Files Here</h3>
+        <p>or</p>
+        <input type="file"
+               #fileInput
+               (change)="onFileSelected($event)"
+               accept=".md"
+               multiple
+               style="display: none;">
+        <button mat-raised-button color="primary" (click)="fileInput.click()">
+          <mat-icon>folder_open</mat-icon>
+          Select Files
+        </button>
+      </div>
+
+      <div *ngIf="uploadProgress.length > 0" class="upload-progress">
+        <h4>Upload Progress:</h4>
+        <p *ngFor="let message of uploadProgress">{{ message }}</p>
+        <mat-spinner *ngIf="isUploading" diameter="30"></mat-spinner>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Dialog -->
+<div *ngIf="showSettingsDialog" class="document-modal" (click)="closeSettingsDialog()">
+  <div class="upload-dialog" (click)="$event.stopPropagation()">
+    <div class="document-header">
+      <h2>Settings</h2>
+      <button mat-icon-button (click)="closeSettingsDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="upload-content">
+      <div class="settings-section" *ngIf="currentConfig">
+        <h3>Configuration</h3>
+
+        <div class="config-info">
+          <p><strong>Current Watch Directory:</strong></p>
+          <p class="config-value">{{ currentConfig.watchDirectory }}</p>
+
+          <p><strong>Upload Directory:</strong></p>
+          <p class="config-value">{{ currentConfig.uploadDirectory }}</p>
+
+          <p><strong>Statistics:</strong></p>
+          <p class="config-value">{{ totalDocuments }} documents, {{ totalWords }} words</p>
+        </div>
+
+        <mat-divider style="margin: 2rem 0;"></mat-divider>
+
+        <h3>Update Watch Directory</h3>
+        <p class="help-text">Enter the full path to the directory containing your markdown files.</p>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+          <mat-label>Watch Directory Path</mat-label>
+          <input matInput
+                 [(ngModel)]="newWatchDirectory"
+                 placeholder="/path/to/markdown/files"
+                 [disabled]="isUpdatingSettings">
+          <mat-icon matSuffix>folder</mat-icon>
+        </mat-form-field>
+
+        <div class="settings-actions">
+          <button mat-raised-button
+                  color="primary"
+                  (click)="updateWatchDirectory()"
+                  [disabled]="isUpdatingSettings || newWatchDirectory === currentConfig.watchDirectory">
+            <mat-icon>save</mat-icon>
+            Update Directory
+          </button>
+        </div>
+
+        <div *ngIf="settingsMessage" class="settings-message success">
+          <mat-icon>check_circle</mat-icon>
+          {{ settingsMessage }}
+        </div>
+
+        <div *ngIf="settingsError" class="settings-message error">
+          <mat-icon>error</mat-icon>
+          {{ settingsError }}
+        </div>
+
+        <div *ngIf="isUpdatingSettings" style="text-align: center; margin-top: 1rem;">
+          <mat-spinner diameter="30"></mat-spinner>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Dialog -->
+  <div class="shortcuts-modal" *ngIf="showKeyboardShortcutsDialog" (click)="closeKeyboardShortcuts()">
+    <div class="shortcuts-dialog" (click)="$event.stopPropagation()">
+      <div class="shortcuts-header">
+        <h2>Keyboard Shortcuts</h2>
+        <button mat-icon-button (click)="closeKeyboardShortcuts()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="shortcuts-content">
+        <div class="shortcuts-section">
+          <h3>Editor</h3>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>B</kbd></span>
+            <span class="shortcut-desc">Bold text</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>I</kbd></span>
+            <span class="shortcut-desc">Italic text</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>S</kbd></span>
+            <span class="shortcut-desc">Save document</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Z</kbd></span>
+            <span class="shortcut-desc">Undo</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd></span>
+            <span class="shortcut-desc">Redo</span>
+          </div>
+        </div>
+        <div class="shortcuts-section">
+          <h3>Find & Replace</h3>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>F</kbd></span>
+            <span class="shortcut-desc">Open find & replace</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>H</kbd></span>
+            <span class="shortcut-desc">Open find & replace (with replace)</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Enter</kbd></span>
+            <span class="shortcut-desc">Find next</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Shift</kbd> + <kbd>Enter</kbd></span>
+            <span class="shortcut-desc">Find previous</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Esc</kbd></span>
+            <span class="shortcut-desc">Close find & replace</span>
+          </div>
+        </div>
+        <div class="shortcuts-section">
+          <h3>Document</h3>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>P</kbd></span>
+            <span class="shortcut-desc">Print document</span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-keys"><kbd>Esc</kbd></span>
+            <span class="shortcut-desc">Close document</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

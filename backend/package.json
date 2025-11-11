@@ -1,0 +1,30 @@
+{
+  "name": "markdown-reader-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Markdown Reader - Search-first markdown application",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "markdown",
+    "search",
+    "reader",
+    "fts5"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^9.6.0",
+    "chokidar": "^4.0.3",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "gray-matter": "^4.0.3",
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.0",
+    "multer": "^2.0.2",
+    "natural": "^8.1.0"
+  }
+}

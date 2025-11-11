@@ -1,0 +1,22 @@
+{
+  "name": "markdown-reader-e2e-tests",
+  "version": "1.0.0",
+  "description": "E2E tests for Markdown Reader Application",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:search": "playwright test e2e/tests/01-search.spec.ts",
+    "test:collections": "playwright test e2e/tests/02-collections.spec.ts",
+    "test:highlighting": "playwright test e2e/tests/03-syntax-highlighting.spec.ts",
+    "test:report": "playwright show-report",
+    "test:codegen": "playwright codegen http://localhost:4201"
+  },
+  "keywords": ["testing", "e2e", "playwright", "markdown"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.49.1"
+  }
+}
