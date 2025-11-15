@@ -1,0 +1,75 @@
+.document-toc {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 1.5rem;
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  background: var(--background);
+}
+
+.document-toc h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.875rem;
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toc-list li {
+  margin: 0;
+}
+
+.toc-list a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.toc-list a:hover {
+  background: var(--surface);
+  color: var(--primary-color);
+}
+
+.toc-level-1 {
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
+.toc-level-1:first-child {
+  margin-top: 0;
+}
+
+.toc-level-2 a {
+  padding-left: 1.5rem;
+}
+
+.toc-level-3 a {
+  padding-left: 2.25rem;
+  font-size: 0.875rem;
+}
+
+.toc-level-4 a {
+  padding-left: 3rem;
+  font-size: 0.875rem;
+}
+
+.toc-level-5 a,
+.toc-level-6 a {
+  padding-left: 3.75rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}

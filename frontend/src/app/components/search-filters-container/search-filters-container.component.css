@@ -1,0 +1,138 @@
+:host {
+  display: block;
+}
+
+.filters-section {
+  margin-top: 2rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filter-toggle {
+  margin-bottom: 1rem;
+  border-radius: var(--radius-md) !important;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-toggle .mat-icon {
+  margin-right: 0 !important;
+}
+
+.filter-count {
+  margin-left: 0.5rem;
+  background: var(--primary-color);
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.filter-actions-inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.filter-content {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  margin-top: 1rem;
+  border: 1px solid var(--border-color);
+  animation: fadeIn 0.2s ease-in;
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-group {
+  margin-bottom: 2rem;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group h4 {
+  margin: 0 0 1rem 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.filter-group h4 span {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.date-range-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.date-range-inputs mat-form-field {
+  width: 100%;
+}
+
+.filter-group mat-form-field {
+  width: 100%;
+  max-width: 400px;
+}
+
+.filter-chip {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0.25rem;
+  border: 1px solid var(--border-color);
+  background: var(--surface) !important;
+  color: var(--text-primary) !important;
+}
+
+.filter-chip:hover {
+  background: var(--primary-light) !important;
+  color: white !important;
+  border-color: var(--primary-light) !important;
+  transform: translateY(-1px);
+}
+
+.filter-chip.selected {
+  background: var(--primary-color) !important;
+  color: white !important;
+  border-color: var(--primary-color) !important;
+  font-weight: 500;
+}
+
+.filter-group button[mat-raised-button] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-group button[mat-raised-button] mat-icon {
+  margin-right: 0 !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

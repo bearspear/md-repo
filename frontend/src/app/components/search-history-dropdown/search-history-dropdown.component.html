@@ -1,0 +1,17 @@
+<div class="search-history-dropdown">
+  <div class="search-history-header">
+    <span>Recent Searches</span>
+    <button mat-button (click)="onClear()" class="clear-history-btn">
+      <mat-icon>clear_all</mat-icon>
+      Clear
+    </button>
+  </div>
+  <div class="search-history-items">
+    <button *ngFor="let item of history"
+            class="search-history-item"
+            (click)="onSelectHistory(item)">
+      <mat-icon>history</mat-icon>
+      <span>{{ item }}</span>
+    </button>
+  </div>
+</div>

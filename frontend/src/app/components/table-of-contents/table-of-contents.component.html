@@ -1,0 +1,16 @@
+<aside class="document-toc">
+  <h3>Table of Contents</h3>
+  <nav>
+    <ul class="toc-list">
+      <li *ngFor="let item of tocItems"
+          [class.toc-level-1]="item.level === 1"
+          [class.toc-level-2]="item.level === 2"
+          [class.toc-level-3]="item.level === 3"
+          [class.toc-level-4]="item.level === 4"
+          [class.toc-level-5]="item.level === 5"
+          [class.toc-level-6]="item.level === 6">
+        <a (click)="onItemClick(item.id)">{{ item.text }}</a>
+      </li>
+    </ul>
+  </nav>
+</aside>

@@ -1,0 +1,251 @@
+/* Host styling */
+:host {
+  display: block;
+  height: 100%;
+}
+
+/* Document Editor */
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  background: white;
+}
+
+.editor-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+}
+
+.editor-toolbar button[mat-icon-button] {
+  width: 36px;
+  height: 36px;
+}
+
+.toolbar-spacer {
+  flex: 1;
+}
+
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-right: 1rem;
+}
+
+.save-status mat-icon {
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.editor-textarea {
+  flex: 1;
+  padding: 16px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  outline: none;
+
+  /* GitHub font stack - system sans-serif */
+  font-family: -apple-system, "system-ui", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 14px;
+  line-height: 1.428; /* GitHub's 19.999px / 14px */
+  font-weight: 400;
+  letter-spacing: normal;
+
+  /* GitHub colors */
+  resize: vertical;
+  background: transparent;
+  color: #1f2328;
+
+  /* Text behavior */
+  overflow-wrap: break-word;
+  white-space-collapse: preserve;
+  appearance: none;
+  -webkit-appearance: none;
+
+  /* Smooth text rendering */
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Tab size */
+  tab-size: 4;
+  -moz-tab-size: 4;
+
+  /* Smooth transitions */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.editor-textarea:focus {
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+  outline: none;
+}
+
+.editor-textarea::placeholder {
+  color: #6e7781;
+  opacity: 1;
+  font-style: normal;
+}
+
+.editor-toolbar button[mat-raised-button],
+.editor-toolbar button[mat-stroked-button] {
+  min-width: 80px;
+}
+
+/* Split View Editor Styles */
+.editor-split-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  gap: 1px;
+  background: var(--border-color);
+}
+
+.editor-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  min-width: 0;
+}
+
+.editor-panel .editor-textarea {
+  flex: 1;
+  padding: 16px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  outline: none;
+
+  /* GitHub font stack - system sans-serif */
+  font-family: -apple-system, "system-ui", "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-size: 14px;
+  line-height: 1.428; /* GitHub's 19.999px / 14px */
+  font-weight: 400;
+  letter-spacing: normal;
+
+  /* GitHub colors */
+  resize: vertical;
+  background: transparent;
+  color: #1f2328;
+
+  /* Text behavior */
+  overflow-wrap: break-word;
+  white-space-collapse: preserve;
+  appearance: none;
+  -webkit-appearance: none;
+
+  /* Smooth text rendering */
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Tab size */
+  tab-size: 4;
+  -moz-tab-size: 4;
+
+  /* Smooth transitions */
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.editor-panel .editor-textarea:focus {
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+  outline: none;
+}
+
+.preview-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.preview-content {
+  padding: 2rem;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+/* Split view specific adjustments */
+.editor-container.split-view .editor-split-container {
+  display: flex;
+}
+
+/* Non-split view (editor only or preview only) */
+.editor-container:not(.split-view) .editor-split-container {
+  display: block;
+}
+
+.editor-container:not(.split-view) .editor-panel,
+.editor-container:not(.split-view) .preview-panel {
+  flex: none;
+  height: 100%;
+}
+
+/* ========================================
+   Find & Replace Panel
+   ======================================== */
+.find-replace-panel {
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.find-replace-row,
+.replace-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.find-icon,
+.replace-icon {
+  color: #666;
+  font-size: 20px;
+}
+
+.find-input,
+.replace-input {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: 'SF Mono', 'Consolas', 'Menlo', 'Monaco', 'Courier New', monospace;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.find-input:focus,
+.replace-input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
+}
+
+.find-count {
+  font-size: 13px;
+  color: #666;
+  min-width: 60px;
+  text-align: center;
+  font-family: 'SF Mono', 'Consolas', 'Menlo', 'Monaco', 'Courier New', monospace;
+}
+
+.replace-row {
+  padding-left: 28px; /* Align with find input (icon width + gap) */
+}

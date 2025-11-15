@@ -1,0 +1,34 @@
+<div class="document-header">
+  <h2>Upload Markdown Files</h2>
+  <button mat-icon-button (click)="onClose()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<div class="upload-content">
+  <div
+    class="drop-zone"
+    [class.drag-over]="dragOver"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
+    <mat-icon class="upload-icon">cloud_upload</mat-icon>
+    <h3>Drag & Drop .md Files Here</h3>
+    <p>or</p>
+    <input type="file"
+           #fileInput
+           (change)="onFileSelected($event)"
+           accept=".md"
+           multiple
+           style="display: none;">
+    <button mat-raised-button color="primary" (click)="fileInput.click()">
+      <mat-icon>folder_open</mat-icon>
+      Select Files
+    </button>
+  </div>
+
+  <div *ngIf="uploadProgress.length > 0" class="upload-progress">
+    <h4>Upload Progress:</h4>
+    <p *ngFor="let message of uploadProgress">{{ message }}</p>
+    <mat-spinner *ngIf="isUploading" diameter="30"></mat-spinner>
+  </div>
+</div>

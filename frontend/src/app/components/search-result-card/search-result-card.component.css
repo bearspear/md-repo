@@ -1,0 +1,135 @@
+:host {
+  display: block;
+}
+
+.result-card {
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-color);
+  background: var(--surface) !important;
+  position: relative;
+}
+
+.result-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg) !important;
+  border-color: var(--primary-light);
+}
+
+.result-card mat-card-title {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.result-card mat-card-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.snippet {
+  margin: 1.25rem 0;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+}
+
+.snippet mark {
+  background-color: #fef3c7;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: #92400e;
+}
+
+.metadata {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1rem 0 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.tags {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+mat-chip {
+  font-size: 0.8125rem;
+  background: var(--background) !important;
+  border: 1px solid var(--border-color);
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+  color: var(--text-muted) !important;
+  transition: all 0.2s ease !important;
+}
+
+.favorite-btn.is-favorite {
+  color: #f59e0b !important;
+}
+
+.favorite-btn:hover {
+  color: #f59e0b !important;
+  transform: scale(1.1);
+}
+
+.collection-btn {
+  position: absolute;
+  top: 1rem;
+  right: 4rem;
+  z-index: 10;
+  color: var(--text-muted) !important;
+  transition: all 0.2s ease !important;
+}
+
+.collection-btn:hover {
+  color: var(--primary-color) !important;
+  transform: scale(1.1);
+}
+
+.collection-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.collection-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.collection-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.collection-badge-color {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.collection-badge-name {
+  color: var(--text-primary);
+  font-weight: 500;
+}

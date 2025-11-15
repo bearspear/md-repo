@@ -1,0 +1,61 @@
+<div class="document-header">
+  <h2>Settings</h2>
+  <button mat-icon-button (click)="onClose()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<div class="upload-content">
+  <div class="settings-section" *ngIf="currentConfig">
+    <h3>Configuration</h3>
+
+    <div class="config-info">
+      <p><strong>Current Watch Directory:</strong></p>
+      <p class="config-value">{{ currentConfig.watchDirectory }}</p>
+
+      <p><strong>Upload Directory:</strong></p>
+      <p class="config-value">{{ currentConfig.uploadDirectory }}</p>
+
+      <p><strong>Statistics:</strong></p>
+      <p class="config-value">{{ totalDocuments }} documents, {{ totalWords }} words</p>
+    </div>
+
+    <mat-divider style="margin: 2rem 0;"></mat-divider>
+
+    <h3>Update Watch Directory</h3>
+    <p class="help-text">Enter the full path to the directory containing your markdown files.</p>
+
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Watch Directory Path</mat-label>
+      <input matInput
+             [ngModel]="newWatchDirectory"
+             (ngModelChange)="onNewWatchDirectoryChange($event)"
+             placeholder="/path/to/markdown/files"
+             [disabled]="isUpdatingSettings">
+      <mat-icon matSuffix>folder</mat-icon>
+    </mat-form-field>
+
+    <div class="settings-actions">
+      <button mat-raised-button
+              color="primary"
+              (click)="onUpdateWatchDirectory()"
+              [disabled]="isUpdateDisabled()">
+        <mat-icon>save</mat-icon>
+        Update Directory
+      </button>
+    </div>
+
+    <div *ngIf="settingsMessage" class="settings-message success">
+      <mat-icon>check_circle</mat-icon>
+      {{ settingsMessage }}
+    </div>
+
+    <div *ngIf="settingsError" class="settings-message error">
+      <mat-icon>error</mat-icon>
+      {{ settingsError }}
+    </div>
+
+    <div *ngIf="isUpdatingSettings" style="text-align: center; margin-top: 1rem;">
+      <mat-spinner diameter="30"></mat-spinner>
+    </div>
+  </div>
+</div>

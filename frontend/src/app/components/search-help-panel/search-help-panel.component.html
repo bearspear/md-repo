@@ -1,0 +1,51 @@
+<div class="search-help-header">
+  <h3>Advanced Search Syntax</h3>
+  <button mat-icon-button (click)="onClose()" class="close-help-btn">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<div class="search-help-content">
+  <div class="help-section">
+    <h4>Boolean Operators</h4>
+    <ul>
+      <li><code>angular AND typescript</code> - Both words must appear</li>
+      <li><code>react OR vue</code> - Either word must appear</li>
+      <li><code>javascript NOT framework</code> - Exclude documents with "framework"</li>
+      <li><code>+required -excluded</code> - Shorthand for AND/NOT</li>
+    </ul>
+  </div>
+
+  <div class="help-section">
+    <h4>Phrase Search</h4>
+    <ul>
+      <li><code>"exact phrase"</code> - Match exact phrase</li>
+      <li><code>"machine learning"</code> - Words in exact order</li>
+    </ul>
+  </div>
+
+  <div class="help-section">
+    <h4>Wildcard & Prefix</h4>
+    <ul>
+      <li><code>java*</code> - Matches java, javascript, javadoc, etc.</li>
+      <li><code>test*</code> - Matches test, testing, tests, etc.</li>
+    </ul>
+  </div>
+
+  <div class="help-section">
+    <h4>Field Search</h4>
+    <ul>
+      <li><code>title:angular</code> - Search only in title</li>
+      <li><code>content:api</code> - Search only in content</li>
+    </ul>
+  </div>
+
+  <div class="help-section">
+    <h4>Examples</h4>
+    <ul>
+      <li><code>angular AND typescript</code></li>
+      <li><code>"API design" NOT deprecated</code></li>
+      <li><code>react* OR vue*</code></li>
+      <li><code>title:"getting started"</code></li>
+    </ul>
+  </div>
+</div>

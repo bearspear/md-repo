@@ -1,0 +1,19 @@
+<div class="collections-panel">
+  <div class="panel-header">
+    <h3>
+      <mat-icon>folder</mat-icon>
+      Collections
+    </h3>
+    <button mat-button (click)="onClose()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="panel-content">
+    <app-collections-sidebar
+      (createCollection)="onCreateCollection()"
+      (editCollection)="onEditCollection($event)"
+      (deleteCollection)="onDeleteCollection($event)"
+      (collectionSelected)="onCollectionSelected($event)">
+    </app-collections-sidebar>
+  </div>
+</div>

@@ -1,0 +1,33 @@
+<div class="document-header">
+  <div class="document-title-section">
+    <h2>{{ title }}</h2>
+    <span class="document-path">{{ path }}</span>
+  </div>
+  <div class="document-actions">
+    <button mat-icon-button (click)="onToggleEditMode()" [matTooltip]="isEditMode ? 'Exit Edit Mode' : 'Edit Document'" [class.active]="isEditMode">
+      <mat-icon>{{ isEditMode ? 'visibility' : 'edit' }}</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onCyclePreviewMode()" [matTooltip]="getPreviewModeTooltip()" *ngIf="isEditMode">
+      <mat-icon>{{ getPreviewModeIcon() }}</mat-icon>
+    </button>
+    <button mat-icon-button matTooltip="Annotations" [class.active]="annotationsCount > 0" *ngIf="!isEditMode">
+      <mat-icon>highlight</mat-icon>
+      <span class="badge" *ngIf="annotationsCount > 0">{{ annotationsCount }}</span>
+    </button>
+    <button mat-icon-button (click)="onToggleToc()" matTooltip="Toggle Table of Contents" *ngIf="hasToc && !isEditMode">
+      <mat-icon>{{ showToc ? 'menu_open' : 'menu' }}</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onCopyMarkdown()" matTooltip="Copy Markdown">
+      <mat-icon>{{ copySuccess ? 'check' : 'content_copy' }}</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onPrintDocument()" matTooltip="Print">
+      <mat-icon>print</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onToggleFullscreen()" matTooltip="Toggle Fullscreen">
+      <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onCloseDocument()" matTooltip="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>

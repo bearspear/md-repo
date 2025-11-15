@@ -1,0 +1,20 @@
+<div class="favorites-panel">
+  <div class="panel-header">
+    <h3>
+      <mat-icon>star</mat-icon>
+      Favorites ({{ favorites.length }})
+    </h3>
+  </div>
+  <div class="panel-content">
+    <div *ngFor="let favPath of favorites" class="favorite-item">
+      <div class="favorite-info">
+        <span class="favorite-title">{{ getFileName(favPath) }}</span>
+        <span class="favorite-path">{{ favPath }}</span>
+      </div>
+      <button mat-icon-button (click)="onToggleFavorite($event, favPath)" matTooltip="Remove from favorites">
+        <mat-icon>star</mat-icon>
+      </button>
+    </div>
+    <p *ngIf="favorites.length === 0" class="empty-state">No favorites yet. Star documents to save them here!</p>
+  </div>
+</div>

@@ -1,0 +1,41 @@
+<div class="document-header">
+  <h2>{{ editingAnnotation ? 'Edit' : 'Add' }} Annotation</h2>
+  <button mat-icon-button (click)="onClose()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+<div class="annotation-content">
+  <div class="selected-text-preview">
+    <strong>Selected Text:</strong>
+    <p>{{ selectedText }}</p>
+  </div>
+
+  <div class="color-picker">
+    <label>Highlight Color:</label>
+    <div class="color-options">
+      <button *ngFor="let colorOption of availableColors"
+              class="color-option"
+              [class.selected]="currentAnnotation.color === colorOption.value"
+              [style.background-color]="colorOption.color"
+              (click)="selectColor(colorOption.value)"
+              [matTooltip]="colorOption.name">
+      </button>
+    </div>
+  </div>
+
+  <mat-form-field appearance="outline" style="width: 100%;">
+    <mat-label>Note (optional)</mat-label>
+    <textarea matInput
+              [(ngModel)]="currentAnnotation.note"
+              placeholder="Add your notes here..."
+              rows="4"></textarea>
+  </mat-form-field>
+
+  <div class="annotation-actions-footer">
+    <button mat-button (click)="onClose()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="onSave()">
+      <mat-icon>{{ editingAnnotation ? 'save' : 'add' }}</mat-icon>
+      {{ editingAnnotation ? 'Update' : 'Save' }} Annotation
+    </button>
+  </div>
+</div>

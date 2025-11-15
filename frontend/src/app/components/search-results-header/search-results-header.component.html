@@ -1,0 +1,15 @@
+<div class="results-header">
+  <h2>
+    Found {{ resultCount }} results for "{{ searchQuery }}"
+  </h2>
+  <div class="results-export">
+    <button mat-stroked-button (click)="exportJSON.emit()" matTooltip="Export results as JSON">
+      <mat-icon>download</mat-icon>
+      JSON
+    </button>
+    <button mat-stroked-button (click)="exportCSV.emit()" matTooltip="Export results as CSV">
+      <mat-icon>download</mat-icon>
+      CSV
+    </button>
+  </div>
+</div>

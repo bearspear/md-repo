@@ -1,0 +1,18 @@
+<div class="related-documents">
+  <mat-divider style="margin: 3rem 0 2rem 0;"></mat-divider>
+  <h3>
+    <mat-icon>link</mat-icon>
+    Related Documents
+  </h3>
+  <div class="related-list">
+    <div *ngFor="let related of relatedDocuments" class="related-item" (click)="onDocumentClick(related)">
+      <div class="related-info">
+        <span class="related-title">{{ related.title }}</span>
+        <span class="related-path">{{ related.path }}</span>
+      </div>
+      <div class="related-topics">
+        <mat-chip *ngFor="let topic of related.topics.slice(0, 3)">{{ topic }}</mat-chip>
+      </div>
+    </div>
+  </div>
+</div>

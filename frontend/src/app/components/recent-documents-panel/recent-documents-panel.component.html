@@ -1,0 +1,25 @@
+<div class="recent-panel">
+  <div class="panel-header">
+    <h3>
+      <mat-icon>history</mat-icon>
+      Recent Documents ({{ recentDocs.length }})
+    </h3>
+    <div>
+      <button mat-button (click)="onClear()" *ngIf="recentDocs.length > 0">
+        Clear All
+      </button>
+    </div>
+  </div>
+  <div class="panel-content">
+    <div *ngFor="let doc of recentDocs" class="recent-item" (click)="onOpenDocument(doc)">
+      <div class="recent-info">
+        <span class="recent-title">{{ doc.title }}</span>
+        <span class="recent-meta">{{ doc.path }} · {{ formatDate(doc.viewedAt) }}</span>
+      </div>
+      <div class="recent-topics" *ngIf="doc.topics.length > 0">
+        <mat-chip *ngFor="let topic of doc.topics.slice(0, 3)">{{ topic }}</mat-chip>
+      </div>
+    </div>
+    <p *ngIf="recentDocs.length === 0" class="empty-state">No recent documents yet.</p>
+  </div>
+</div>

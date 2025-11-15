@@ -1,0 +1,69 @@
+<div class="shortcuts-modal" (click)="onBackdropClick()">
+  <div class="shortcuts-dialog" (click)="onDialogClick($event)">
+    <div class="shortcuts-header">
+      <h2>Keyboard Shortcuts</h2>
+      <button mat-icon-button (click)="onClose()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="shortcuts-content">
+      <div class="shortcuts-section">
+        <h3>Editor</h3>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>B</kbd></span>
+          <span class="shortcut-desc">Bold text</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>I</kbd></span>
+          <span class="shortcut-desc">Italic text</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>S</kbd></span>
+          <span class="shortcut-desc">Save document</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Z</kbd></span>
+          <span class="shortcut-desc">Undo</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Z</kbd></span>
+          <span class="shortcut-desc">Redo</span>
+        </div>
+      </div>
+      <div class="shortcuts-section">
+        <h3>Find & Replace</h3>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>F</kbd></span>
+          <span class="shortcut-desc">Open find & replace</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>H</kbd></span>
+          <span class="shortcut-desc">Open find & replace (with replace)</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Enter</kbd></span>
+          <span class="shortcut-desc">Find next</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Shift</kbd> + <kbd>Enter</kbd></span>
+          <span class="shortcut-desc">Find previous</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Esc</kbd></span>
+          <span class="shortcut-desc">Close find & replace</span>
+        </div>
+      </div>
+      <div class="shortcuts-section">
+        <h3>Document</h3>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Ctrl</kbd> + <kbd>P</kbd></span>
+          <span class="shortcut-desc">Print document</span>
+        </div>
+        <div class="shortcut-row">
+          <span class="shortcut-keys"><kbd>Esc</kbd></span>
+          <span class="shortcut-desc">Close document</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

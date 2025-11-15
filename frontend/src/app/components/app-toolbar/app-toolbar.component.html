@@ -1,0 +1,25 @@
+<mat-toolbar color="primary">
+  <span>{{ title }}</span>
+  <span class="spacer"></span>
+  <span class="stats">{{ totalDocuments }} docs | {{ totalWords }} words</span>
+  <button mat-icon-button (click)="onToggleIndex()" matTooltip="Document Index" [class.active]="showIndex">
+    <mat-icon>menu_book</mat-icon>
+  </button>
+  <button mat-icon-button (click)="onToggleCollections()" matTooltip="Collections" [class.active]="showCollections">
+    <mat-icon>folder</mat-icon>
+  </button>
+  <button mat-icon-button (click)="onToggleFavorites()" matTooltip="Favorites" [class.active]="showFavorites">
+    <mat-icon>star</mat-icon>
+    <span class="badge" *ngIf="favoritesCount > 0">{{ favoritesCount }}</span>
+  </button>
+  <button mat-icon-button (click)="onToggleRecent()" matTooltip="Recent Documents" [class.active]="showRecent">
+    <mat-icon>history</mat-icon>
+    <span class="badge" *ngIf="recentCount > 0">{{ recentCount }}</span>
+  </button>
+  <button mat-icon-button (click)="onOpenUploadDialog()" matTooltip="Upload Documents">
+    <mat-icon>upload_file</mat-icon>
+  </button>
+  <button mat-icon-button (click)="onOpenSettings()" matTooltip="Settings">
+    <mat-icon>settings</mat-icon>
+  </button>
+</mat-toolbar>

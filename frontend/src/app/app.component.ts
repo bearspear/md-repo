@@ -46,6 +46,28 @@ import { ApplicationStateInitializerService, AppStateCallbacks } from './service
 import { CollectionsSidebarComponent } from './components/collections-sidebar/collections-sidebar.component';
 import { CollectionDialogComponent } from './components/collection-dialog/collection-dialog.component';
 import { DocumentCollectionsDialogComponent } from './components/document-collections-dialog/document-collections-dialog.component';
+import { SearchHelpPanelComponent } from './components/search-help-panel/search-help-panel.component';
+import { SearchHistoryDropdownComponent } from './components/search-history-dropdown/search-history-dropdown.component';
+import { WelcomeMessageComponent } from './components/welcome-message/welcome-message.component';
+import { KeyboardShortcutsDialogComponent } from './components/keyboard-shortcuts-dialog/keyboard-shortcuts-dialog.component';
+import { FavoritesPanelComponent } from './components/favorites-panel/favorites-panel.component';
+import { RecentDocumentsPanelComponent } from './components/recent-documents-panel/recent-documents-panel.component';
+import { SavedSearchesPanelComponent } from './components/saved-searches-panel/saved-searches-panel.component';
+import { DocumentIndexComponent } from './components/document-index/document-index.component';
+import { SearchResultCardComponent } from './components/search-result-card/search-result-card.component';
+import { AnnotationsSectionComponent } from './components/annotations-section/annotations-section.component';
+import { SearchFiltersContainerComponent } from './components/search-filters-container/search-filters-container.component';
+import { DocumentToolbarComponent } from './components/document-toolbar/document-toolbar.component';
+import { AnnotationDialogComponent } from './components/annotation-dialog/annotation-dialog.component';
+import { UploadDialogComponent } from './components/upload-dialog/upload-dialog.component';
+import { SettingsDialogComponent } from './components/settings-dialog/settings-dialog.component';
+import { MarkdownEditorComponent } from './components/markdown-editor/markdown-editor.component';
+import { AppToolbarComponent } from './components/app-toolbar/app-toolbar.component';
+import { CollectionsPanelComponent } from './components/collections-panel/collections-panel.component';
+import { TableOfContentsComponent } from './components/table-of-contents/table-of-contents.component';
+import { RelatedDocumentsComponent } from './components/related-documents/related-documents.component';
+import { SearchResultsHeaderComponent } from './components/search-results-header/search-results-header.component';
+import { NoResultsMessageComponent } from './components/no-results-message/no-results-message.component';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
@@ -68,7 +90,29 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
     MatSelectModule,
     MatDialogModule,
     MarkdownModule,
-    CollectionsSidebarComponent
+    CollectionsSidebarComponent,
+    SearchHelpPanelComponent,
+    SearchHistoryDropdownComponent,
+    WelcomeMessageComponent,
+    KeyboardShortcutsDialogComponent,
+    FavoritesPanelComponent,
+    RecentDocumentsPanelComponent,
+    SavedSearchesPanelComponent,
+    DocumentIndexComponent,
+    SearchResultCardComponent,
+    AnnotationsSectionComponent,
+    SearchFiltersContainerComponent,
+    DocumentToolbarComponent,
+    AnnotationDialogComponent,
+    UploadDialogComponent,
+    SettingsDialogComponent,
+    MarkdownEditorComponent,
+    AppToolbarComponent,
+    CollectionsPanelComponent,
+    TableOfContentsComponent,
+    RelatedDocumentsComponent,
+    SearchResultsHeaderComponent,
+    NoResultsMessageComponent
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
@@ -355,6 +399,13 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   isFavorite(path: string): boolean {
     return this.favoritesService.isFavorite(path);
+  }
+
+  openFavoriteDocument(path: string) {
+    const result = this.searchState.searchResults.find(r => r.path === path);
+    if (result) {
+      this.openDocument(result);
+    }
   }
 
   // Recent documents methods

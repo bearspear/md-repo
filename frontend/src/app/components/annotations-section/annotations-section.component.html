@@ -1,0 +1,43 @@
+<div class="annotations-section" *ngIf="annotations.length > 0">
+  <mat-divider style="margin: 3rem 0 2rem 0;"></mat-divider>
+  <div class="annotations-header">
+    <h3>
+      <mat-icon>highlight</mat-icon>
+      Annotations ({{ annotations.length }})
+    </h3>
+    <div class="annotations-export">
+      <button mat-stroked-button (click)="onExportJSON()" matTooltip="Export as JSON">
+        <mat-icon>download</mat-icon>
+        JSON
+      </button>
+      <button mat-stroked-button (click)="onExportCSV()" matTooltip="Export as CSV">
+        <mat-icon>download</mat-icon>
+        CSV
+      </button>
+    </div>
+  </div>
+  <div class="annotations-list">
+    <div *ngFor="let annotation of annotations"
+         class="annotation-item"
+         [style.border-left-color]="getColorStyle(annotation.color)">
+      <div class="annotation-header">
+        <div class="annotation-color" [style.background-color]="getColorStyle(annotation.color)"></div>
+        <div class="annotation-text">{{ annotation.selectedText }}</div>
+        <div class="annotation-actions">
+          <button mat-icon-button (click)="onEditAnnotation(annotation)" matTooltip="Edit">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button (click)="onDeleteAnnotation(annotation)" matTooltip="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      <div class="annotation-note" *ngIf="annotation.note">
+        {{ annotation.note }}
+      </div>
+      <div class="annotation-meta">
+        {{ formatDate(annotation.createdAt) }}
+      </div>
+    </div>
+  </div>
+</div>

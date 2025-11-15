@@ -1,0 +1,107 @@
+:host {
+  background: var(--surface);
+  width: 90%;
+  max-width: 650px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg), 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  display: block;
+}
+
+.document-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.document-header h2 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-content {
+  padding: 2rem;
+}
+
+.drop-zone {
+  border: 3px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 3.5rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  background: var(--background);
+}
+
+.drop-zone:hover {
+  border-color: var(--primary-light);
+  background: rgba(37, 99, 235, 0.02);
+}
+
+.drop-zone.drag-over {
+  border-color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.05);
+  transform: scale(1.01);
+}
+
+.drop-zone .upload-icon {
+  font-size: 64px !important;
+  width: 64px !important;
+  height: 64px !important;
+  line-height: 64px !important;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.drop-zone h3 {
+  margin: 1rem 0 0.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.drop-zone p {
+  margin: 0.5rem 0;
+  color: var(--text-muted);
+}
+
+.drop-zone button {
+  margin-top: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.drop-zone button .mat-icon {
+  margin-right: 0 !important;
+}
+
+.upload-progress {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--background);
+  border-radius: var(--radius-md);
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.upload-progress h4 {
+  margin-top: 0;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.upload-progress p {
+  margin: 0.75rem 0;
+  font-family: 'SF Mono', monospace;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}

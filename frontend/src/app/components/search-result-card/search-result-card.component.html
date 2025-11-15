@@ -1,0 +1,34 @@
+<mat-card class="result-card">
+  <button mat-icon-button class="favorite-btn" (click)="onToggleFavorite($event)" [class.is-favorite]="isFavorite">
+    <mat-icon>{{ isFavorite ? 'star' : 'star_border' }}</mat-icon>
+  </button>
+  <button mat-icon-button class="collection-btn" (click)="onOpenCollections($event)" matTooltip="Add to Collection">
+    <mat-icon>folder_open</mat-icon>
+  </button>
+  <div (click)="onOpenDocument()">
+    <mat-card-header>
+      <mat-card-title>{{ result.title }}</mat-card-title>
+      <mat-card-subtitle>{{ result.path }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="snippet" [innerHTML]="result.snippet"></div>
+      <div class="metadata">
+        <span class="word-count">{{ result.wordCount }} words</span>
+        <span class="date">{{ formatDate(result.modifiedAt) }}</span>
+      </div>
+      <div class="tags" *ngIf="result.topics.length > 0">
+        <mat-chip-set>
+          <mat-chip *ngFor="let topic of result.topics.slice(0, 5)">
+            {{ topic }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+      <div class="collection-badges" *ngIf="result.collections && result.collections.length > 0">
+        <div *ngFor="let collection of result.collections" class="collection-badge" [matTooltip]="collection.name">
+          <div class="collection-badge-color" [style.background-color]="collection.color"></div>
+          <span class="collection-badge-name">{{ collection.name }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </div>
+</mat-card>

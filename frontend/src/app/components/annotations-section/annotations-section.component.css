@@ -1,0 +1,131 @@
+:host {
+  display: block;
+}
+
+.annotations-section {
+  margin-top: 2rem;
+}
+
+.annotations-section h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.annotations-section h3 mat-icon {
+  font-size: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  color: var(--primary-color);
+}
+
+.annotations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.annotations-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.annotations-export {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.annotations-export button {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+}
+
+.annotations-export button mat-icon {
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.annotations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.annotation-item {
+  padding: 1.25rem;
+  background: var(--background);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.annotation-item:hover {
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.annotation-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.annotation-color {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.annotation-text {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.annotation-actions {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.annotation-actions .mat-mdc-icon-button {
+  width: 32px;
+  height: 32px;
+  padding: 4px;
+}
+
+.annotation-actions .mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.annotation-note {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0.75rem 0 0.5rem 0;
+  padding-left: 2.5rem;
+}
+
+.annotation-meta {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding-left: 2.5rem;
+}

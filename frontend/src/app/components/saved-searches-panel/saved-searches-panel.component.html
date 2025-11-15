@@ -1,0 +1,12 @@
+<div class="saved-searches-panel">
+  <div class="saved-search-item" *ngFor="let search of savedSearches; let i = index">
+    <button mat-button (click)="onApply(search)" class="saved-search-btn">
+      <mat-icon>bookmark</mat-icon>
+      <span>{{ search.name }}</span>
+      <small>{{ search.query }}</small>
+    </button>
+    <button mat-icon-button (click)="onDelete(i)" matTooltip="Delete">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+</div>

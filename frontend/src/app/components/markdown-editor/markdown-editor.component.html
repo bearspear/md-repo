@@ -1,0 +1,134 @@
+<div class="editor-container" [class.split-view]="previewMode === 'split'">
+  <!-- Markdown Toolbar -->
+  <div class="editor-toolbar">
+    <button mat-icon-button (click)="onInsertMarkdown('bold')" matTooltip="Bold">
+      <mat-icon>format_bold</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('italic')" matTooltip="Italic">
+      <mat-icon>format_italic</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('heading')" matTooltip="Heading">
+      <mat-icon>title</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('link')" matTooltip="Link">
+      <mat-icon>link</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('code')" matTooltip="Code">
+      <mat-icon>code</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('list')" matTooltip="List">
+      <mat-icon>format_list_bulleted</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('strikethrough')" matTooltip="Strikethrough">
+      <mat-icon>format_strikethrough</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('blockquote')" matTooltip="Blockquote">
+      <mat-icon>format_quote</mat-icon>
+    </button>
+
+    <mat-divider [vertical]="true" style="height: 24px; margin: 0 8px;"></mat-divider>
+
+    <button mat-icon-button (click)="onInsertMarkdown('table')" matTooltip="Table">
+      <mat-icon>table_chart</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('image')" matTooltip="Image">
+      <mat-icon>image</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('hr')" matTooltip="Horizontal Rule">
+      <mat-icon>horizontal_rule</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onInsertMarkdown('task')" matTooltip="Task List">
+      <mat-icon>check_box</mat-icon>
+    </button>
+
+    <mat-divider [vertical]="true" style="height: 24px; margin: 0 8px;"></mat-divider>
+
+    <button mat-icon-button (click)="onToggleFindReplace()" matTooltip="Find & Replace (Ctrl+F)">
+      <mat-icon>search</mat-icon>
+    </button>
+    <button mat-icon-button (click)="onShowKeyboardShortcuts()" matTooltip="Keyboard Shortcuts">
+      <mat-icon>keyboard</mat-icon>
+    </button>
+
+    <span class="toolbar-spacer"></span>
+
+    <!-- Save Status -->
+    <span class="save-status">
+      <mat-icon *ngIf="isSaving">hourglass_empty</mat-icon>
+      <mat-icon *ngIf="!isSaving && !hasUnsavedChanges && lastSavedAt">check_circle</mat-icon>
+      <mat-icon *ngIf="hasUnsavedChanges && !isSaving">edit</mat-icon>
+      <span *ngIf="isSaving">Saving...</span>
+      <span *ngIf="!isSaving && !hasUnsavedChanges && lastSavedAt">
+        Saved {{ lastSavedAt | date:'short' }}
+      </span>
+      <span *ngIf="hasUnsavedChanges && !isSaving">Unsaved changes</span>
+    </span>
+
+    <button mat-stroked-button (click)="onDiscardChanges()" [disabled]="!hasUnsavedChanges">
+      Discard
+    </button>
+    <button mat-raised-button color="primary" (click)="onSaveDocument()" [disabled]="!hasUnsavedChanges || isSaving">
+      Save
+    </button>
+  </div>
+
+  <!-- Find & Replace Panel -->
+  <div class="find-replace-panel" *ngIf="showFindReplace">
+    <div class="find-replace-row">
+      <mat-icon class="find-icon">search</mat-icon>
+      <input
+        type="text"
+        class="find-input"
+        [(ngModel)]="findText"
+        (ngModelChange)="onFindTextChange()"
+        placeholder="Find"
+        (keydown.enter)="onFindNext()"
+        (keydown.escape)="onToggleFindReplace()"
+        #findInput>
+      <button mat-icon-button (click)="onFindPrevious()" matTooltip="Previous (Shift+Enter)">
+        <mat-icon>keyboard_arrow_up</mat-icon>
+      </button>
+      <button mat-icon-button (click)="onFindNext()" matTooltip="Next (Enter)">
+        <mat-icon>keyboard_arrow_down</mat-icon>
+      </button>
+      <span class="find-count" *ngIf="findText">{{ currentMatchIndex + 1 }} of {{ totalMatches }}</span>
+      <button mat-icon-button (click)="onToggleFindReplace()" matTooltip="Close (Esc)">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="replace-row" *ngIf="showReplace">
+      <mat-icon class="replace-icon">find_replace</mat-icon>
+      <input
+        type="text"
+        class="replace-input"
+        [(ngModel)]="replaceText"
+        (ngModelChange)="onReplaceTextChange()"
+        placeholder="Replace"
+        (keydown.enter)="onReplaceNext()"
+        (keydown.escape)="onToggleFindReplace()">
+      <button mat-button (click)="onReplaceNext()">Replace</button>
+      <button mat-button (click)="onReplaceAll()">Replace All</button>
+    </div>
+  </div>
+
+  <!-- Split View Container -->
+  <div class="editor-split-container">
+    <!-- Editor Panel -->
+    <div class="editor-panel" *ngIf="previewMode === 'editor' || previewMode === 'split'">
+      <!-- Markdown Editor -->
+      <textarea
+        class="editor-textarea"
+        [(ngModel)]="editedContent"
+        (ngModelChange)="onContentChange()"
+        placeholder="Edit markdown content here...">
+      </textarea>
+    </div>
+
+    <!-- Preview Panel -->
+    <div class="preview-panel" *ngIf="previewMode === 'preview' || previewMode === 'split'">
+      <div class="preview-content">
+        <markdown [data]="editedContent"></markdown>
+      </div>
+    </div>
+  </div>
+</div>

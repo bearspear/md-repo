@@ -1,0 +1,87 @@
+<div class="filters-section">
+  <div class="filter-header">
+    <button mat-stroked-button (click)="onToggleFilters()" class="filter-toggle">
+      <mat-icon>{{showFilters ? 'expand_less' : 'filter_list'}}</mat-icon>
+      Advanced Filters
+      <span *ngIf="hasActiveFilters" class="filter-count">Active</span>
+    </button>
+
+    <div class="filter-actions-inline">
+      <button mat-button (click)="onClearFilters()" *ngIf="hasActiveFilters">
+        <mat-icon>clear</mat-icon>
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="showFilters" class="filter-content">
+    <!-- Date Range Filter -->
+    <div class="filter-group">
+      <h4>Date Range</h4>
+      <div class="date-range-inputs">
+        <mat-form-field appearance="outline">
+          <mat-label>From</mat-label>
+          <input matInput [matDatepicker]="pickerFrom" [(ngModel)]="dateFrom" (dateChange)="onDateChange()">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFrom></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>To</mat-label>
+          <input matInput [matDatepicker]="pickerTo" [(ngModel)]="dateTo" (dateChange)="onDateChange()">
+          <mat-datepicker-toggle matIconSuffix [for]="pickerTo"></mat-datepicker-toggle>
+          <mat-datepicker #pickerTo></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Content Type Filter -->
+    <div class="filter-group">
+      <h4>Content Type</h4>
+      <mat-form-field appearance="outline">
+        <mat-label>Select content type</mat-label>
+        <mat-select [(ngModel)]="contentType" (selectionChange)="onContentTypeChange()">
+          <mat-option value="">All Types</mat-option>
+          <mat-option value="markdown">Markdown</mat-option>
+          <mat-option value="note">Note</mat-option>
+          <mat-option value="documentation">Documentation</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Topics Filter -->
+    <div class="filter-group" *ngIf="availableTopics.length > 0">
+      <h4>Topics <span *ngIf="selectedTopics.length > 0">({{selectedTopics.length}} selected)</span></h4>
+      <mat-chip-set>
+        <mat-chip
+          *ngFor="let topic of availableTopics"
+          (click)="onToggleTopic(topic.name)"
+          [class.selected]="isTopicSelected(topic.name)"
+          class="filter-chip">
+          {{ topic.name }} ({{ topic.count }})
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <!-- Tags Filter -->
+    <div class="filter-group" *ngIf="availableTags.length > 0">
+      <h4>Tags <span *ngIf="selectedTags.length > 0">({{selectedTags.length}} selected)</span></h4>
+      <mat-chip-set>
+        <mat-chip
+          *ngFor="let tag of availableTags"
+          (click)="onToggleTag(tag.name)"
+          [class.selected]="isTagSelected(tag.name)"
+          class="filter-chip">
+          {{ tag.name }} ({{ tag.count }})
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <!-- Save Search Button -->
+    <div class="filter-group" *ngIf="canSaveSearch">
+      <button mat-raised-button color="accent" (click)="onSaveSearch()">
+        <mat-icon>bookmark_add</mat-icon>
+        Save This Search
+      </button>
+    </div>
+  </div>
+</div>
