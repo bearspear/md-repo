@@ -20,11 +20,19 @@
     "better-sqlite3": "^9.6.0",
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
+    "docx": "^9.5.1",
+    "epub-parser": "^0.2.5",
     "express": "^5.1.0",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
+    "jsdom": "^22.1.0",
+    "mammoth": "^1.11.0",
     "markdown-it": "^14.1.0",
+    "marked": "^4.3.0",
     "multer": "^2.0.2",
-    "natural": "^8.1.0"
+    "natural": "^8.1.0",
+    "pdf-parse": "^1.1.1",
+    "puppeteer": "^24.30.0",
+    "turndown": "^7.2.2"
   }
 }

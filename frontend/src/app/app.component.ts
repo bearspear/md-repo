@@ -1,6 +1,7 @@
 import { Component, OnInit, HostListener, ViewChild, ElementRef, AfterViewChecked, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -76,6 +77,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
   imports: [
     CommonModule,
     FormsModule,
+    RouterOutlet,
     MatToolbarModule,
     MatInputModule,
     MatButtonModule,

@@ -1,0 +1,117 @@
+.import-content {
+  min-width: 500px;
+  padding: 20px 0;
+}
+
+.supported-formats {
+  margin-bottom: 24px;
+}
+
+.format-label {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.format-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.format-chips mat-chip {
+  font-size: 12px;
+}
+
+.file-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.file-info {
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.file-details {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-details mat-icon {
+  color: #666;
+}
+
+.file-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #999;
+}
+
+.upload-progress {
+  margin: 16px 0;
+}
+
+.upload-progress p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.upload-progress mat-progress-bar {
+  margin-bottom: 4px;
+}
+
+.progress-text {
+  font-size: 12px;
+  color: #999;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #ffebee;
+  border-left: 4px solid #f44336;
+  border-radius: 4px;
+  margin: 16px 0;
+}
+
+.error-message mat-icon {
+  color: #f44336;
+}
+
+.error-message span {
+  font-size: 14px;
+  color: #c62828;
+}
+
+mat-dialog-actions {
+  padding: 16px 0 0 0;
+  margin: 0;
+}
+
+mat-dialog-actions button {
+  margin-left: 8px;
+}
+
+mat-dialog-actions button mat-icon {
+  margin-right: 4px;
+}

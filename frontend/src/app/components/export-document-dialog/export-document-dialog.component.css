@@ -1,0 +1,135 @@
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+mat-dialog-content {
+  padding: 24px !important;
+  min-width: 500px;
+  max-width: 600px;
+}
+
+.export-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dialog-description {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.format-selection {
+  margin: 16px 0;
+}
+
+.format-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.format-option {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.format-option:hover {
+  border-color: #3f51b5;
+  background-color: #f5f7ff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.format-option mat-radio-button {
+  width: 100%;
+}
+
+.format-option mat-radio-button ::ng-deep .mdc-radio {
+  margin-right: 12px;
+}
+
+.format-option mat-radio-button ::ng-deep .mdc-label {
+  width: 100%;
+  cursor: pointer;
+}
+
+.format-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.format-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.format-header mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: #3f51b5;
+}
+
+.format-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.format-description {
+  font-size: 13px;
+  color: #666;
+  margin-left: 28px;
+}
+
+.export-progress {
+  margin-top: 16px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background-color: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 4px;
+  color: #c62828;
+  font-size: 14px;
+}
+
+.error-message mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px !important;
+  border-top: 1px solid #e0e0e0;
+  margin: 0 !important;
+}
+
+mat-dialog-actions button {
+  margin-left: 8px;
+}
+
+mat-dialog-actions button mat-icon {
+  margin-right: 8px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}

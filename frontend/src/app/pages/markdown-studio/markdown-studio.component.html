@@ -1,0 +1,109 @@
+<!-- Studio Toolbar -->
+<mat-toolbar class="studio-toolbar" color="primary">
+  <span class="toolbar-title">
+    <mat-icon>edit_note</mat-icon>
+    Markdown Studio
+  </span>
+
+  <span class="spacer"></span>
+
+  <button mat-button (click)="newDocument()" matTooltip="New Document">
+    <mat-icon>note_add</mat-icon>
+    New
+  </button>
+
+  <button mat-button (click)="importDocument()" matTooltip="Import File">
+    <mat-icon>upload_file</mat-icon>
+    Import
+  </button>
+
+  <button mat-button (click)="saveDocument()" matTooltip="Save (Ctrl+S)">
+    <mat-icon>save</mat-icon>
+    Save
+    <span *ngIf="hasUnsavedChanges" class="unsaved-indicator">*</span>
+  </button>
+
+  <button mat-button (click)="exportDocument()" matTooltip="Export Document">
+    <mat-icon>download</mat-icon>
+    Export
+  </button>
+
+  <mat-divider [vertical]="true" class="toolbar-divider"></mat-divider>
+
+  <button mat-icon-button (click)="toggleSidebar()" matTooltip="Toggle Sidebar">
+    <mat-icon>{{ showSidebar ? 'menu_open' : 'menu' }}</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="togglePreview()" matTooltip="Toggle Preview">
+    <mat-icon>{{ showPreview ? 'visibility' : 'visibility_off' }}</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="toggleFullscreen()" matTooltip="Toggle Fullscreen (F11)">
+    <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+  </button>
+</mat-toolbar>
+
+<!-- Three-Pane Layout -->
+<div class="studio-container" [class.fullscreen]="isFullscreen">
+
+  <!-- Left Sidebar (TOC) -->
+  <aside class="sidebar" *ngIf="showSidebar">
+    <div class="sidebar-header">
+      <h3>Table of Contents</h3>
+    </div>
+    <div class="sidebar-content">
+      <div *ngIf="tocItems.length === 0" class="placeholder-text">
+        Start typing headings to build the table of contents...
+      </div>
+      <nav *ngIf="tocItems.length > 0" class="toc-nav">
+        <div
+          *ngFor="let item of tocItems"
+          class="toc-item toc-level-{{ item.level }}"
+          (click)="scrollToHeading(item.id)"
+          [attr.title]="item.text">
+          {{ item.text }}
+        </div>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Middle Pane - Editor -->
+  <div class="editor-pane">
+    <div class="editor-header">
+      <input
+        type="text"
+        [(ngModel)]="documentTitle"
+        class="document-title-input"
+        placeholder="Document Title"
+      />
+      <span class="save-status" *ngIf="lastSaved">
+        Last saved: {{ lastSaved | date:'short' }}
+      </span>
+    </div>
+
+    <div class="editor-container">
+      <textarea
+        [(ngModel)]="markdownContent"
+        (ngModelChange)="onContentChange()"
+        class="markdown-editor"
+        placeholder="Start typing your markdown here..."
+        autofocus
+      ></textarea>
+    </div>
+  </div>
+
+  <!-- Right Pane - Preview -->
+  <div class="preview-pane" *ngIf="showPreview">
+    <div class="preview-header">
+      <h3>
+        <mat-icon>visibility</mat-icon>
+        Preview
+      </h3>
+    </div>
+
+    <div class="preview-container" #previewContainer>
+      <markdown [data]="previewContent" [disableSanitizer]="true"></markdown>
+    </div>
+  </div>
+
+</div>

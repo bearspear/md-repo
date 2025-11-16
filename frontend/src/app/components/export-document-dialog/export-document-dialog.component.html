@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>
+  <mat-icon>download</mat-icon>
+  Export Document
+</h2>
+
+<mat-dialog-content>
+  <div class="export-content">
+    <p class="dialog-description">
+      Choose a format to export your markdown document
+    </p>
+
+    <div class="format-selection">
+      <mat-radio-group [(ngModel)]="selectedFormat" class="format-options">
+        <div *ngFor="let format of exportFormats" class="format-option">
+          <mat-radio-button [value]="format.value" [disabled]="isExporting">
+            <div class="format-info">
+              <div class="format-header">
+                <mat-icon>{{ format.icon }}</mat-icon>
+                <span class="format-label">{{ format.label }}</span>
+              </div>
+              <div class="format-description">{{ format.description }}</div>
+            </div>
+          </mat-radio-button>
+        </div>
+      </mat-radio-group>
+    </div>
+
+    <mat-progress-bar
+      *ngIf="isExporting"
+      mode="indeterminate"
+      class="export-progress">
+    </mat-progress-bar>
+
+    <div *ngIf="errorMessage" class="error-message">
+      <mat-icon>error</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="isExporting">
+    Cancel
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="exportDocument()"
+    [disabled]="isExporting || !selectedFormat">
+    <mat-icon>download</mat-icon>
+    {{ isExporting ? 'Exporting...' : 'Export' }}
+  </button>
+</mat-dialog-actions>

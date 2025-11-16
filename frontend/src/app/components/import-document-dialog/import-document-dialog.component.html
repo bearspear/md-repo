@@ -1,0 +1,76 @@
+<h2 mat-dialog-title>Import Document</h2>
+
+<mat-dialog-content>
+  <div class="import-content">
+    <!-- Supported Formats Info -->
+    <div class="supported-formats">
+      <p class="format-label">Supported formats:</p>
+      <div class="format-chips">
+        <mat-chip *ngFor="let format of supportedFormats">
+          {{ format.label }}
+        </mat-chip>
+      </div>
+    </div>
+
+    <!-- File Selection -->
+    <div class="file-selection">
+      <input
+        type="file"
+        #fileInput
+        (change)="onFileSelected($event)"
+        accept=".html,.htm,.txt,.pdf,.docx,.epub"
+        style="display: none"
+      />
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="fileInput.click()"
+        [disabled]="isUploading"
+      >
+        <mat-icon>attach_file</mat-icon>
+        Choose File
+      </button>
+
+      <!-- Selected File Info -->
+      <div *ngIf="selectedFile" class="file-info">
+        <div class="file-details">
+          <mat-icon>description</mat-icon>
+          <div class="file-text">
+            <span class="file-name">{{ selectedFile.name }}</span>
+            <span class="file-size">{{ getFileSize() }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload Progress -->
+    <div *ngIf="isUploading" class="upload-progress">
+      <p>Uploading and converting...</p>
+      <mat-progress-bar
+        mode="determinate"
+        [value]="uploadProgress"
+      ></mat-progress-bar>
+      <span class="progress-text">{{ uploadProgress }}%</span>
+    </div>
+
+    <!-- Error Message -->
+    <div *ngIf="errorMessage" class="error-message">
+      <mat-icon>error</mat-icon>
+      <span>{{ errorMessage }}</span>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()" [disabled]="isUploading">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="importFile()"
+    [disabled]="!selectedFile || isUploading || !isFileSupported()"
+  >
+    <mat-icon>file_download</mat-icon>
+    Import
+  </button>
+</mat-dialog-actions>
