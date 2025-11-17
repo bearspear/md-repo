@@ -97,10 +97,10 @@ export const appConfig: ApplicationConfig = {
         },
       },
       markedExtensions: [
-        markedEmoji({
-          emojis,
-          renderer: (token) => token.emoji
-        }),
+        // markedEmoji({
+        //   emojis,
+        //   renderer: (token) => token.emoji
+        // }),
         markedFootnote(),
         {
           hooks: {

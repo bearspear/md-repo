@@ -175,3 +175,5 @@ docs/.vitepress/cache
 /ms-playwright/
 
 /docs
+/.studio-documents
+/backend/images

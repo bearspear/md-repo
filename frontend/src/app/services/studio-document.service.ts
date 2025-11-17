@@ -22,7 +22,7 @@ export interface StudioDocumentSummary {
   providedIn: 'root'
 })
 export class StudioDocumentService {
-  private apiUrl = 'http://localhost:3001/api/studio/documents';
+  private apiUrl = 'http://localhost:3011/api/studio/documents';
 
   constructor(private http: HttpClient) {}
 

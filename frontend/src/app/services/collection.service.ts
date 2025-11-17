@@ -26,7 +26,7 @@ export interface CollectionDocument {
   providedIn: 'root'
 })
 export class CollectionService {
-  private apiUrl = 'http://localhost:3001/api';
+  private apiUrl = 'http://localhost:3011/api';
 
   constructor(private http: HttpClient) {}
 

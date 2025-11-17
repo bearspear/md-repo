@@ -30,6 +30,8 @@ export class ImportDocumentDialogComponent {
   convertedMarkdown = '';
 
   supportedFormats = [
+    { extension: '.md', label: 'Markdown' },
+    { extension: '.markdown', label: 'Markdown' },
     { extension: '.html', label: 'HTML' },
     { extension: '.htm', label: 'HTML' },
     { extension: '.txt', label: 'Text' },
@@ -88,7 +90,7 @@ export class ImportDocumentDialogComponent {
     const formData = new FormData();
     formData.append('file', this.selectedFile);
 
-    this.http.post('http://localhost:3001/api/studio/import', formData, {
+    this.http.post('http://localhost:3011/api/studio/import', formData, {
       reportProgress: true,
       observe: 'events'
     }).subscribe({

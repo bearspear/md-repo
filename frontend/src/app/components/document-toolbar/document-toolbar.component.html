@@ -4,8 +4,8 @@
     <span class="document-path">{{ path }}</span>
   </div>
   <div class="document-actions">
-    <button mat-icon-button (click)="onToggleEditMode()" [matTooltip]="isEditMode ? 'Exit Edit Mode' : 'Edit Document'" [class.active]="isEditMode">
-      <mat-icon>{{ isEditMode ? 'visibility' : 'edit' }}</mat-icon>
+    <button mat-icon-button (click)="onToggleEditMode()" matTooltip="Edit in Markdown Studio">
+      <mat-icon>edit</mat-icon>
     </button>
     <button mat-icon-button (click)="onCyclePreviewMode()" [matTooltip]="getPreviewModeTooltip()" *ngIf="isEditMode">
       <mat-icon>{{ getPreviewModeIcon() }}</mat-icon>

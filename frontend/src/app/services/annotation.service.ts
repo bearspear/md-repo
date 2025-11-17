@@ -18,7 +18,7 @@ export interface Annotation {
   providedIn: 'root'
 })
 export class AnnotationService {
-  private apiUrl = 'http://localhost:3001/api';
+  private apiUrl = 'http://localhost:3011/api';
 
   constructor(private http: HttpClient) {}
 

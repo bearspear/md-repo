@@ -28,26 +28,39 @@ class DocumentConverter {
   async convertToMarkdown(filePath, mimeType) {
     const extension = filePath.split('.').pop().toLowerCase();
 
+    let markdown;
     switch (extension) {
+      case 'md':
+      case 'markdown':
+        markdown = await this.convertMarkdownToMarkdown(filePath);
+        break;
+
       case 'html':
       case 'htm':
-        return await this.convertHtmlToMarkdown(filePath);
+        markdown = await this.convertHtmlToMarkdown(filePath);
+        break;
 
       case 'txt':
-        return await this.convertTextToMarkdown(filePath);
+        markdown = await this.convertTextToMarkdown(filePath);
+        break;
 
       case 'pdf':
-        return await this.convertPdfToMarkdown(filePath);
+        markdown = await this.convertPdfToMarkdown(filePath);
+        break;
 
       case 'docx':
-        return await this.convertDocxToMarkdown(filePath);
+        markdown = await this.convertDocxToMarkdown(filePath);
+        break;
 
       case 'epub':
-        return await this.convertEpubToMarkdown(filePath);
+        markdown = await this.convertEpubToMarkdown(filePath);
+        break;
 
       default:
         throw new Error(`Unsupported file type: ${extension}`);
     }
+
+    return markdown;
   }
 
   /**
@@ -67,6 +80,21 @@ class DocumentConverter {
       return markdown;
     } catch (error) {
       throw new Error(`HTML conversion failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Convert Markdown file to Markdown (passthrough with validation)
+   */
+  async convertMarkdownToMarkdown(filePath) {
+    try {
+      const markdownContent = await fs.readFile(filePath, 'utf8');
+
+      // Markdown files are already in the correct format
+      // Just return the content as-is
+      return markdownContent;
+    } catch (error) {
+      throw new Error(`Markdown read failed: ${error.message}`);
     }
   }
 
@@ -179,7 +207,7 @@ class DocumentConverter {
    * Get supported file extensions
    */
   getSupportedExtensions() {
-    return ['html', 'htm', 'txt', 'pdf', 'docx', 'epub'];
+    return ['md', 'markdown', 'html', 'htm', 'txt', 'pdf', 'docx', 'epub'];
   }
 
   /**

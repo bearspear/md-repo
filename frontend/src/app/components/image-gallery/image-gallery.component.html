@@ -1,0 +1,137 @@
+<div class="gallery-container">
+  <!-- Header -->
+  <div class="gallery-header">
+    <h3>
+      <mat-icon>photo_library</mat-icon>
+      Image Gallery
+    </h3>
+    <button mat-icon-button (click)="refresh()" matTooltip="Refresh Gallery">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search images</mat-label>
+      <input
+        matInput
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchChange()"
+        placeholder="Search by name or type..."
+      />
+      <button
+        *ngIf="searchQuery"
+        matSuffix
+        mat-icon-button
+        (click)="clearSearch()"
+        matTooltip="Clear search"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading images...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !loading" class="error-container">
+    <mat-icon class="error-icon">error</mat-icon>
+    <p>{{ error }}</p>
+    <button mat-button color="primary" (click)="loadImages()">
+      Try Again
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && !error && images.length === 0" class="empty-container">
+    <mat-icon class="empty-icon">photo_library</mat-icon>
+    <p>No images uploaded yet</p>
+    <p class="empty-hint">Upload images using the Image or URL buttons above</p>
+  </div>
+
+  <!-- Gallery Grid -->
+  <div *ngIf="!loading && !error && filteredImages.length > 0" class="gallery-grid">
+    <mat-card
+      *ngFor="let image of filteredImages"
+      class="image-card"
+    >
+      <!-- Image Actions Menu -->
+      <div class="image-actions">
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="imageMenu"
+          (click)="$event.stopPropagation()"
+          matTooltip="Image actions"
+          class="actions-button"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+
+        <mat-menu #imageMenu="matMenu">
+          <button mat-menu-item (click)="onImageClick(image)">
+            <mat-icon>add_circle_outline</mat-icon>
+            <span>Insert into editor</span>
+          </button>
+          <button mat-menu-item (click)="copyMarkdownReference(image, $event)">
+            <mat-icon>content_copy</mat-icon>
+            <span>Copy markdown</span>
+          </button>
+          <button mat-menu-item (click)="viewImage(image, $event)">
+            <mat-icon>open_in_new</mat-icon>
+            <span>View full size</span>
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="deleteImage(image, $event)" class="delete-action">
+            <mat-icon>delete</mat-icon>
+            <span>Delete image</span>
+          </button>
+        </mat-menu>
+      </div>
+
+      <div class="image-thumbnail" (click)="onImageClick(image)">
+        <img
+          [src]="getThumbnailUrl(image.imageId)"
+          [alt]="image.originalName"
+          loading="lazy"
+        />
+      </div>
+
+      <mat-card-content class="image-info" (click)="onImageClick(image)">
+        <div class="image-name" [title]="image.originalName">
+          {{ image.originalName }}
+        </div>
+        <div class="image-metadata">
+          <span class="metadata-item">
+            <mat-icon class="metadata-icon">straighten</mat-icon>
+            {{ image.width }} × {{ image.height }}
+          </span>
+          <span class="metadata-item">
+            <mat-icon class="metadata-icon">storage</mat-icon>
+            {{ formatSize(image.size) }}
+          </span>
+        </div>
+        <div class="image-metadata">
+          <span class="metadata-item">
+            <mat-icon class="metadata-icon">link</mat-icon>
+            {{ image.referenceCount }} reference(s)
+          </span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- No Results State -->
+  <div *ngIf="!loading && !error && searchQuery && filteredImages.length === 0" class="empty-container">
+    <mat-icon class="empty-icon">search_off</mat-icon>
+    <p>No images match your search</p>
+    <button mat-button color="primary" (click)="clearSearch()">
+      Clear Search
+    </button>
+  </div>
+</div>

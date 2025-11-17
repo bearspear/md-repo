@@ -7,10 +7,12 @@ const DocumentDatabase = require('./database');
 const FileWatcher = require('./services/fileWatcher');
 const DocumentConverter = require('./services/documentConverter');
 const DocumentExporter = require('./services/documentExporter');
+const ImageRepository = require('./services/imageRepository');
+const ImageLocalizer = require('./utils/image-localizer');
 const config = require('./config');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3011;
 
 // Middleware
 app.use(cors());
@@ -60,7 +62,7 @@ const importUpload = multer({
   storage: importStorage,
   fileFilter: (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase();
-    const allowedExtensions = ['.html', '.htm', '.txt', '.pdf', '.docx', '.epub'];
+    const allowedExtensions = ['.md', '.markdown', '.html', '.htm', '.txt', '.pdf', '.docx', '.epub'];
 
     if (allowedExtensions.includes(ext)) {
       cb(null, true);
@@ -83,7 +85,17 @@ const fileWatcher = new FileWatcher(db, watchPath);
 // Initialize document converter
 const documentConverter = new DocumentConverter();
 
+// Initialize image repository and localizer
+const imageRepository = new ImageRepository();
+const imageLocalizer = new ImageLocalizer(imageRepository);
+
+// Import image routes
+const imageRoutes = require('./routes/images');
+
 // API Routes
+
+// Mount image routes
+app.use('/api/images', imageRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -692,18 +704,35 @@ app.post('/api/studio/import', importUpload.single('file'), async (req, res) => 
 
     try {
       // Convert to markdown
-      const markdown = await documentConverter.convertToMarkdown(filePath, req.file.mimetype);
+      let markdown = await documentConverter.convertToMarkdown(filePath, req.file.mimetype);
 
       // Clean up uploaded file
       fs.unlinkSync(filePath);
 
       console.log(`Successfully converted ${originalFilename} to Markdown`);
 
+      // Localize images (extract and upload to repository)
+      let localizedImages = [];
+      try {
+        const localizationResult = await imageLocalizer.localizeImages(markdown, originalFilename);
+        markdown = localizationResult.markdown;
+        localizedImages = localizationResult.images;
+
+        if (localizationResult.localizedCount > 0) {
+          console.log(`[Import] Localized ${localizationResult.localizedCount} image(s) from ${originalFilename}`);
+        }
+      } catch (imageError) {
+        console.error(`[Import] Failed to localize images: ${imageError.message}`);
+        // Continue with original markdown if image localization fails
+      }
+
       res.json({
         message: 'File converted successfully',
         markdown: markdown,
         originalFilename: originalFilename,
-        fileType: path.extname(originalFilename).toLowerCase()
+        fileType: path.extname(originalFilename).toLowerCase(),
+        localizedImages: localizedImages.length,
+        images: localizedImages
       });
     } catch (conversionError) {
       // Clean up uploaded file on conversion error

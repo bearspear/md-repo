@@ -8,8 +8,9 @@
 .editor-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 200px);
+  height: 100%;
   background: white;
+  overflow: hidden;
 }
 
 .editor-toolbar {
@@ -25,6 +26,13 @@
 .editor-toolbar button[mat-icon-button] {
   width: 36px;
   height: 36px;
+}
+
+.heading-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.7);
 }
 
 .toolbar-spacer {

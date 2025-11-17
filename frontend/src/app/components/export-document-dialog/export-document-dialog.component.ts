@@ -110,7 +110,7 @@ export class ExportDocumentDialogComponent {
       title: this.data.title || 'document'
     };
 
-    this.http.post('http://localhost:3001/api/studio/export', exportRequest, {
+    this.http.post('http://localhost:3011/api/studio/export', exportRequest, {
       responseType: 'blob',
       observe: 'response'
     }).subscribe({

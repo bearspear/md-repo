@@ -193,6 +193,12 @@ html, body {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  font-family: 'Material Icons' !important;
+}
+
+/* Ensure non-icon text doesn't use Material Icons font */
+body, p, span, div, time, label, input, textarea, select, button:not(.mat-mdc-icon-button) {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
 }
 
 /* Chip Improvements */

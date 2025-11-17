@@ -28,7 +28,21 @@
     Export
   </button>
 
+  <button mat-button (click)="uploadImage()" matTooltip="Upload Image">
+    <mat-icon>image</mat-icon>
+    Image
+  </button>
+
+  <button mat-button (click)="importImageFromUrl()" matTooltip="Import Image from URL">
+    <mat-icon>link</mat-icon>
+    URL
+  </button>
+
   <mat-divider [vertical]="true" class="toolbar-divider"></mat-divider>
+
+  <button mat-icon-button (click)="toggleGallery()" matTooltip="Toggle Image Gallery">
+    <mat-icon>{{ showGallery ? 'photo_library' : 'collections' }}</mat-icon>
+  </button>
 
   <button mat-icon-button (click)="toggleSidebar()" matTooltip="Toggle Sidebar">
     <mat-icon>{{ showSidebar ? 'menu_open' : 'menu' }}</mat-icon>
@@ -47,7 +61,7 @@
 <div class="studio-container" [class.fullscreen]="isFullscreen">
 
   <!-- Left Sidebar (TOC) -->
-  <aside class="sidebar" *ngIf="showSidebar">
+  <aside class="sidebar" *ngIf="showSidebar" #sidebar>
     <div class="sidebar-header">
       <h3>Table of Contents</h3>
     </div>
@@ -67,8 +81,19 @@
     </div>
   </aside>
 
+  <!-- Resize Handle 1: Sidebar <=> Editor -->
+  <div class="resize-handle" *ngIf="showSidebar"
+       (mousedown)="onResizeStart($event, 'sidebar')"
+       matTooltip="Drag to resize">
+    <div class="resize-handle-line"></div>
+  </div>
+
   <!-- Middle Pane - Editor -->
-  <div class="editor-pane">
+  <div class="editor-pane" #editorPane
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave($event)"
+       (drop)="onDrop($event)"
+       [class.dragging-over]="isDraggingOver">
     <div class="editor-header">
       <input
         type="text"
@@ -76,20 +101,38 @@
         class="document-title-input"
         placeholder="Document Title"
       />
-      <span class="save-status" *ngIf="lastSaved">
-        Last saved: {{ lastSaved | date:'short' }}
-      </span>
     </div>
 
-    <div class="editor-container">
-      <textarea
-        [(ngModel)]="markdownContent"
-        (ngModelChange)="onContentChange()"
-        class="markdown-editor"
-        placeholder="Start typing your markdown here..."
-        autofocus
-      ></textarea>
+    <!-- Enhanced Markdown Editor with Comprehensive Toolbar -->
+    <app-markdown-editor
+      [(editedContent)]="markdownContent"
+      [previewMode]="getEditorMode()"
+      [isSaving]="false"
+      [hasUnsavedChanges]="hasUnsavedChanges"
+      [lastSavedAt]="lastSaved"
+      [showSaveControls]="false"
+      (contentChange)="onContentChange()"
+      (insertMarkdown)="insertMarkdown($event)"
+      (undo)="performUndo()"
+      (redo)="performRedo()"
+      (discardChanges)="discardChanges()"
+      (saveDocument)="saveDocument()">
+    </app-markdown-editor>
+
+    <!-- Drag & Drop Overlay -->
+    <div class="drag-drop-overlay" *ngIf="isDraggingOver">
+      <div class="drag-drop-content">
+        <mat-icon class="drag-icon">cloud_upload</mat-icon>
+        <p class="drag-text">Drop images here to upload</p>
+      </div>
     </div>
+  </div>
+
+  <!-- Resize Handle 2: Editor <=> Preview -->
+  <div class="resize-handle" *ngIf="showPreview"
+       (mousedown)="onResizeStart($event, 'editor')"
+       matTooltip="Drag to resize">
+    <div class="resize-handle-line"></div>
   </div>
 
   <!-- Right Pane - Preview -->
@@ -104,6 +147,11 @@
     <div class="preview-container" #previewContainer>
       <markdown [data]="previewContent" [disableSanitizer]="true"></markdown>
     </div>
+  </div>
+
+  <!-- Gallery Pane -->
+  <div class="gallery-pane" *ngIf="showGallery">
+    <app-image-gallery (imageSelected)="onImageSelected($event)"></app-image-gallery>
   </div>
 
 </div>

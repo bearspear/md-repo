@@ -54,7 +54,7 @@ export interface Topic {
   providedIn: 'root'
 })
 export class SearchService {
-  private apiUrl = 'http://localhost:3001/api';
+  private apiUrl = 'http://localhost:3011/api';
 
   constructor(private http: HttpClient) {}
 

@@ -124,6 +124,48 @@ class DocumentDatabase {
       END;
     `);
 
+    // Create images table
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS images (
+        image_id TEXT PRIMARY KEY,
+        original_name TEXT NOT NULL,
+        mime_type TEXT NOT NULL,
+        size INTEGER NOT NULL,
+        width INTEGER,
+        height INTEGER,
+        extension TEXT NOT NULL,
+        reference_count INTEGER DEFAULT 1,
+        has_thumbnail INTEGER DEFAULT 0,
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
+    `);
+
+    // Create document_images junction table (many-to-many)
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS document_images (
+        document_path TEXT NOT NULL,
+        image_id TEXT NOT NULL,
+        markdown_reference TEXT,
+        added_at INTEGER NOT NULL,
+        PRIMARY KEY (document_path, image_id),
+        FOREIGN KEY (document_path) REFERENCES documents(path) ON DELETE CASCADE,
+        FOREIGN KEY (image_id) REFERENCES images(image_id) ON DELETE CASCADE
+      );
+    `);
+
+    // Create indices for faster image lookups
+    this.db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_document_images_document
+      ON document_images(document_path);
+
+      CREATE INDEX IF NOT EXISTS idx_document_images_image
+      ON document_images(image_id);
+
+      CREATE INDEX IF NOT EXISTS idx_images_mime_type
+      ON images(mime_type);
+    `);
+
     console.log('✓ Database tables initialized');
   }
 

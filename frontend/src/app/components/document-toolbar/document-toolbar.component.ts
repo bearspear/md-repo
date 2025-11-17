@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -29,9 +30,16 @@ export class DocumentToolbarComponent {
   @Output() printDocument = new EventEmitter<void>();
   @Output() toggleFullscreen = new EventEmitter<void>();
   @Output() closeDocument = new EventEmitter<void>();
+  @Output() openInStudio = new EventEmitter<string>();
+
+  constructor(private router: Router) {}
 
   onToggleEditMode(): void {
-    this.toggleEditMode.emit();
+    // Navigate to Markdown Studio with the document path
+    this.openInStudio.emit(this.path);
+    this.router.navigate(['/studio'], {
+      queryParams: { path: this.path }
+    });
   }
 
   onCyclePreviewMode(): void {
