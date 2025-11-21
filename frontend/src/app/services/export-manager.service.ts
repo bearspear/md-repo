@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Annotation } from './annotation.service';
 import { SearchResult } from './search.service';
+import { DocumentThemeService, DocumentTheme } from './document-theme.service';
 
 export interface ExportData {
   document?: {
@@ -19,7 +20,7 @@ export interface ExportData {
 })
 export class ExportManagerService {
 
-  constructor() {}
+  constructor(private themeService: DocumentThemeService) {}
 
   /**
    * Export annotations as JSON
@@ -144,9 +145,10 @@ export class ExportManagerService {
   exportDocumentAsHTML(
     htmlContent: string,
     title: string,
-    documentPath?: string
+    documentPath?: string,
+    themeId?: string
   ): void {
-    const fullHTML = this.generateStandaloneHTML(htmlContent, title);
+    const fullHTML = this.generateStandaloneHTML(htmlContent, title, themeId);
 
     this.downloadFile(
       fullHTML,
@@ -160,9 +162,10 @@ export class ExportManagerService {
    */
   exportDocumentAsPDF(
     htmlContent: string,
-    title: string
+    title: string,
+    themeId?: string
   ): void {
-    const fullHTML = this.generateStandaloneHTML(htmlContent, title);
+    const fullHTML = this.generateStandaloneHTML(htmlContent, title, themeId);
 
     // Create a temporary window for printing
     const printWindow = window.open('', '_blank');
@@ -186,7 +189,10 @@ export class ExportManagerService {
   /**
    * Generate standalone HTML with all dependencies
    */
-  private generateStandaloneHTML(content: string, title: string): string {
+  private generateStandaloneHTML(content: string, title: string, themeId?: string): string {
+    const theme = themeId ? this.themeService.getThemeById(themeId) : this.themeService.getThemeById('default');
+    const themeCSS = theme ? this.themeService.generateThemeCSS(theme) : '';
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -197,24 +203,29 @@ export class ExportManagerService {
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css">
 
+  <!-- Google Fonts (for theme support) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@600;700;800&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@600;700&family=Source+Code+Pro:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Fira+Code:wght@400;600&display=swap" rel="stylesheet">
+
   <!-- Highlight.js GitHub Theme -->
   <style>
     ${this.getHighlightJSStyles()}
   </style>
 
-  <!-- Custom Styles -->
+  <!-- Theme Styles -->
   <style>
-    ${this.getCustomStyles()}
+    ${themeCSS}
+  </style>
+
+  <!-- Component Styles (Callouts, Charts, etc.) -->
+  <style>
+    ${this.getComponentStyles()}
   </style>
 
   <!-- Print Styles -->
   <style>
     @media print {
-      body {
-        margin: 0;
-        padding: 20px;
-      }
-
       .code-block-wrapper,
       .callout,
       .chart-container {
@@ -223,6 +234,10 @@ export class ExportManagerService {
 
       pre {
         page-break-inside: avoid;
+      }
+
+      @page {
+        margin: 0.5in;
       }
     }
   </style>
@@ -290,47 +305,17 @@ export class ExportManagerService {
   }
 
   /**
-   * Get custom component styles
+   * Get component-specific styles (callouts, charts, code blocks, footnotes)
    */
-  private getCustomStyles(): string {
+  private getComponentStyles(): string {
     return `
       :root {
-        --primary-color: #2563eb;
-        --primary-dark: #1e40af;
-        --primary-light: #3b82f6;
-        --secondary-color: #64748b;
-        --background: #f8fafc;
-        --surface: #ffffff;
-        --text-primary: #0f172a;
-        --text-secondary: #475569;
-        --text-muted: #94a3b8;
-        --border-color: #e2e8f0;
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
         --radius-sm: 0.375rem;
         --radius-md: 0.5rem;
         --radius-lg: 0.75rem;
-      }
-
-      * { box-sizing: border-box; }
-
-      body {
-        margin: 0;
-        padding: 20px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        background: var(--background);
-        color: var(--text-primary);
-        line-height: 1.6;
-        max-width: 900px;
-        margin: 0 auto;
-      }
-
-      article {
-        background: white;
-        padding: 40px;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-md);
       }
 
       /* Callouts */

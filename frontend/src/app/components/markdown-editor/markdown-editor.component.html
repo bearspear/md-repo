@@ -176,13 +176,34 @@
   </div>
 
   <!-- Markdown Editor Textarea -->
-  <textarea
-    #editorTextarea
-    class="editor-textarea"
-    [(ngModel)]="editedContent"
-    (ngModelChange)="onContentChange()"
-    (click)="saveCursorPosition()"
-    (keyup)="saveCursorPosition()"
-    placeholder="Edit markdown content here...">
-  </textarea>
+  <div class="editor-wrapper">
+    <textarea
+      #editorTextarea
+      class="editor-textarea"
+      [class.typewriter-mode]="typewriterMode"
+      [(ngModel)]="editedContent"
+      (ngModelChange)="onContentChange()"
+      (click)="saveCursorPosition()"
+      (keydown)="onKeyDown($event)"
+      (paste)="onPaste($event)"
+      placeholder="Edit markdown content here...">
+    </textarea>
+
+    <!-- Autocomplete Dropdown -->
+    <div
+      class="autocomplete-dropdown"
+      *ngIf="showAutocomplete"
+      [style.top.px]="autocompletePosition.top"
+      [style.left.px]="autocompletePosition.left">
+      <div
+        *ngFor="let option of autocompleteOptions; let i = index"
+        class="autocomplete-item"
+        [class.selected]="i === selectedAutocompleteIndex"
+        (click)="selectAutocomplete(i)"
+        (mouseenter)="selectedAutocompleteIndex = i">
+        <div class="autocomplete-label">{{ option.label }}</div>
+        <div class="autocomplete-description">{{ option.description }}</div>
+      </div>
+    </div>
+  </div>
 </div>

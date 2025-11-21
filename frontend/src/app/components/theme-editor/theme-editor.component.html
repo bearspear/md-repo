@@ -1,0 +1,286 @@
+<div class="theme-editor">
+  <div class="editor-header">
+    <h2>
+      <mat-icon>palette</mat-icon>
+      Theme Editor
+    </h2>
+    <button mat-icon-button (click)="close()" matTooltip="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="editor-content">
+    <!-- Saved Themes Sidebar -->
+    <div class="saved-themes-panel">
+      <h3>Saved Themes</h3>
+      <div class="saved-themes-list">
+        <div *ngIf="savedThemes.length === 0" class="no-themes">
+          <mat-icon>bookmark_border</mat-icon>
+          <span>No saved themes yet</span>
+        </div>
+        <div *ngFor="let saved of savedThemes" class="saved-theme-item" (click)="loadTheme(saved)">
+          <div class="theme-preview-swatch" [style.background]="saved.colors.primary"></div>
+          <div class="theme-info">
+            <span class="theme-name">{{ saved.name }}</span>
+            <span class="theme-category">{{ saved.category }}</span>
+          </div>
+          <button mat-icon-button (click)="deleteTheme(saved.id); $event.stopPropagation()" matTooltip="Delete">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <h4>Start From</h4>
+        <select (change)="loadFromBuiltIn($any($event.target).value)">
+          <option value="">Select built-in theme...</option>
+          <option value="default">Default</option>
+          <option value="github">GitHub</option>
+          <option value="print-book">Print Book</option>
+          <option value="academic">Academic</option>
+          <option value="minimal">Minimal</option>
+          <option value="modern">Modern</option>
+          <option value="serif-classic">Serif Classic</option>
+          <option value="high-contrast">High Contrast</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Main Editor -->
+    <div class="editor-main">
+      <mat-tab-group>
+        <!-- General Tab -->
+        <mat-tab label="General">
+          <div class="tab-content">
+            <div class="form-group">
+              <label>Theme Name</label>
+              <input type="text" [(ngModel)]="theme.name" (ngModelChange)="onThemeChange()" placeholder="My Theme">
+            </div>
+
+            <div class="form-group">
+              <label>Description</label>
+              <textarea [(ngModel)]="theme.description" (ngModelChange)="onThemeChange()" rows="2" placeholder="Describe your theme..."></textarea>
+            </div>
+
+            <div class="form-group">
+              <label>Category</label>
+              <select [(ngModel)]="theme.category" (ngModelChange)="onThemeChange()">
+                <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
+              </select>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Colors Tab -->
+        <mat-tab label="Colors">
+          <div class="tab-content">
+            <div class="color-presets">
+              <span>Presets:</span>
+              <button mat-stroked-button (click)="applyColorPreset('light')">Light</button>
+              <button mat-stroked-button (click)="applyColorPreset('dark')">Dark</button>
+              <button mat-stroked-button (click)="applyColorPreset('sepia')">Sepia</button>
+            </div>
+
+            <div class="color-grid">
+              <div class="color-item">
+                <label>Primary</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.primary" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.primary" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Secondary</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.secondary" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.secondary" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Accent</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.accent" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.accent" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Background</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.background" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.background" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Surface</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.surface" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.surface" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Text Primary</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.textPrimary" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.textPrimary" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Text Secondary</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.textSecondary" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.textSecondary" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Text Muted</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.textMuted" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.textMuted" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Border</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.border" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.border" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+
+              <div class="color-item">
+                <label>Code Background</label>
+                <div class="color-input-wrapper">
+                  <input type="color" [(ngModel)]="theme.colors.codeBackground" (ngModelChange)="onThemeChange()">
+                  <input type="text" [(ngModel)]="theme.colors.codeBackground" (ngModelChange)="onThemeChange()">
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Typography Tab -->
+        <mat-tab label="Typography">
+          <div class="tab-content">
+            <div class="form-group">
+              <label>Heading Font</label>
+              <select [(ngModel)]="theme.fonts.heading" (ngModelChange)="onThemeChange()">
+                <option *ngFor="let font of fontFamilies" [value]="font.value">{{ font.label }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Body Font</label>
+              <select [(ngModel)]="theme.fonts.body" (ngModelChange)="onThemeChange()">
+                <option *ngFor="let font of fontFamilies" [value]="font.value">{{ font.label }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Code Font</label>
+              <select [(ngModel)]="theme.fonts.code" (ngModelChange)="onThemeChange()">
+                <option *ngFor="let font of codeFontFamilies" [value]="font.value">{{ font.label }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Line Height: {{ theme.layout.lineHeight }}</label>
+              <input type="range" min="1.2" max="2.2" step="0.1" [(ngModel)]="theme.layout.lineHeight" (ngModelChange)="onThemeChange()">
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Layout Tab -->
+        <mat-tab label="Layout">
+          <div class="tab-content">
+            <div class="form-group">
+              <label>Max Width</label>
+              <select [(ngModel)]="theme.layout.maxWidth" (ngModelChange)="onThemeChange()">
+                <option value="600px">Narrow (600px)</option>
+                <option value="700px">Medium-Narrow (700px)</option>
+                <option value="800px">Medium (800px)</option>
+                <option value="900px">Medium-Wide (900px)</option>
+                <option value="1000px">Wide (1000px)</option>
+                <option value="100%">Full Width</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Padding</label>
+              <select [(ngModel)]="theme.layout.padding" (ngModelChange)="onThemeChange()">
+                <option value="1rem">Small (1rem)</option>
+                <option value="1.5rem">Medium (1.5rem)</option>
+                <option value="2rem">Large (2rem)</option>
+                <option value="3rem">Extra Large (3rem)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Heading Spacing</label>
+              <select [(ngModel)]="theme.layout.headingSpacing" (ngModelChange)="onThemeChange()">
+                <option value="1rem">Compact (1rem)</option>
+                <option value="1.5rem">Normal (1.5rem)</option>
+                <option value="2rem">Spacious (2rem)</option>
+                <option value="2.5rem">Extra Spacious (2.5rem)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Paragraph Spacing</label>
+              <select [(ngModel)]="theme.layout.paragraphSpacing" (ngModelChange)="onThemeChange()">
+                <option value="0.5rem">Tight (0.5rem)</option>
+                <option value="1rem">Normal (1rem)</option>
+                <option value="1.5rem">Relaxed (1.5rem)</option>
+              </select>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Custom CSS Tab -->
+        <mat-tab label="Custom CSS">
+          <div class="tab-content">
+            <div class="form-group">
+              <label>Additional CSS</label>
+              <textarea
+                class="css-editor"
+                [(ngModel)]="theme.customCSS"
+                (ngModelChange)="onThemeChange()"
+                rows="15"
+                placeholder="/* Add your custom CSS here */
+h1 {
+  text-transform: uppercase;
+}
+
+blockquote {
+  border-left-color: var(--theme-primary);
+}"></textarea>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
+
+  <div class="editor-footer">
+    <button mat-button (click)="resetToDefault()">
+      <mat-icon>refresh</mat-icon>
+      Reset
+    </button>
+    <button mat-button (click)="duplicateTheme()">
+      <mat-icon>content_copy</mat-icon>
+      Duplicate
+    </button>
+    <span class="spacer"></span>
+    <button mat-button (click)="close()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="saveTheme()">
+      <mat-icon>save</mat-icon>
+      Save Theme
+    </button>
+  </div>
+</div>

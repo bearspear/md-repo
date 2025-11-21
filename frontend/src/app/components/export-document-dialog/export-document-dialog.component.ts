@@ -7,8 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
 import { ExportManagerService } from '../../services/export-manager.service';
+import { DocumentThemeService, DocumentTheme } from '../../services/document-theme.service';
 
 interface ExportFormat {
   value: string;
@@ -21,6 +24,7 @@ export interface ExportDialogData {
   markdown: string;
   htmlContent?: string;
   title: string;
+  preselectedTheme?: string;
 }
 
 @Component({
@@ -35,6 +39,8 @@ export interface ExportDialogData {
     MatProgressBarModule,
     MatChipsModule,
     MatRadioModule,
+    MatSelectModule,
+    MatExpansionModule,
     FormsModule
   ],
   templateUrl: './export-document-dialog.component.html',
@@ -50,15 +56,49 @@ export class ExportDocumentDialogComponent {
   ];
 
   selectedFormat: string = 'html';
+  selectedTheme: string = 'default';
   isExporting: boolean = false;
   errorMessage: string = '';
+
+  // Themes
+  themes: DocumentTheme[] = [];
+  showThemeSelector: boolean = false;
 
   constructor(
     private http: HttpClient,
     private exportManager: ExportManagerService,
+    private themeService: DocumentThemeService,
     public dialogRef: MatDialogRef<ExportDocumentDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ExportDialogData
-  ) {}
+  ) {
+    this.themes = this.themeService.getAllThemes();
+
+    // Use the preview theme if provided
+    if (data.preselectedTheme) {
+      this.selectedTheme = data.preselectedTheme;
+    }
+  }
+
+  /**
+   * Check if current format supports theming
+   */
+  get supportsTheming(): boolean {
+    return this.selectedFormat === 'html' || this.selectedFormat === 'pdf';
+  }
+
+  /**
+   * Get themes by category
+   */
+  getThemesByCategory(category: string): DocumentTheme[] {
+    return this.themes.filter(t => t.category === category);
+  }
+
+  /**
+   * Get currently selected theme details
+   */
+  getSelectedThemeDetails(): DocumentTheme | undefined {
+    return this.themes.find(t => t.id === this.selectedTheme);
+  }
 
   exportDocument() {
     if (!this.selectedFormat) {
@@ -81,12 +121,15 @@ export class ExportDocumentDialogComponent {
         if (this.selectedFormat === 'html') {
           this.exportManager.exportDocumentAsHTML(
             this.data.htmlContent,
-            this.data.title || 'document'
+            this.data.title || 'document',
+            undefined,
+            this.selectedTheme
           );
         } else {
           this.exportManager.exportDocumentAsPDF(
             this.data.htmlContent,
-            this.data.title || 'document'
+            this.data.title || 'document',
+            this.selectedTheme
           );
         }
 

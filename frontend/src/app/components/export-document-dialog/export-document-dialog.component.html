@@ -25,6 +25,48 @@
       </mat-radio-group>
     </div>
 
+    <!-- Theme Selector (for HTML and PDF only) -->
+    <div class="theme-section" *ngIf="supportsTheming">
+      <h3 class="section-title">
+        <mat-icon>palette</mat-icon>
+        Choose a Theme
+      </h3>
+
+      <div class="theme-grid">
+        <div
+          *ngFor="let theme of themes"
+          class="theme-card"
+          [class.selected]="selectedTheme === theme.id"
+          (click)="selectedTheme = theme.id">
+          <div class="theme-preview">
+            <mat-icon class="theme-preview-icon">{{ theme.preview }}</mat-icon>
+          </div>
+          <div class="theme-info">
+            <div class="theme-name">{{ theme.name }}</div>
+            <div class="theme-category">{{ theme.category }}</div>
+          </div>
+          <mat-icon class="selected-icon" *ngIf="selectedTheme === theme.id">check_circle</mat-icon>
+        </div>
+      </div>
+
+      <!-- Theme details -->
+      <div class="theme-details" *ngIf="getSelectedThemeDetails() as theme">
+        <p class="theme-description">
+          {{ theme.description }}
+        </p>
+        <div class="theme-meta">
+          <span class="meta-item">
+            <mat-icon>person</mat-icon>
+            {{ theme.author }}
+          </span>
+          <span class="meta-item">
+            <mat-icon>category</mat-icon>
+            {{ theme.category }}
+          </span>
+        </div>
+      </div>
+    </div>
+
     <mat-progress-bar
       *ngIf="isExporting"
       mode="indeterminate"

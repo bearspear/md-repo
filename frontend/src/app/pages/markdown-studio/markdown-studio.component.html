@@ -12,6 +12,11 @@
     New
   </button>
 
+  <button mat-button (click)="toggleTemplateDialog()" matTooltip="Use Template">
+    <mat-icon>description</mat-icon>
+    Template
+  </button>
+
   <button mat-button (click)="importDocument()" matTooltip="Import File">
     <mat-icon>upload_file</mat-icon>
     Import
@@ -28,6 +33,21 @@
     Export
   </button>
 
+  <button mat-button (click)="openEpubExportDialog()" matTooltip="Export as EPUB e-book">
+    <mat-icon>book</mat-icon>
+    EPUB
+  </button>
+
+  <button mat-button (click)="exportToPdf()" matTooltip="Export as PDF">
+    <mat-icon>picture_as_pdf</mat-icon>
+    PDF
+  </button>
+
+  <button mat-button (click)="toggleFindReplace()" matTooltip="Find and Replace (Ctrl+F / Ctrl+H)" [class.active]="showFindReplace">
+    <mat-icon>find_replace</mat-icon>
+    Find
+  </button>
+
   <button mat-button (click)="uploadImage()" matTooltip="Upload Image">
     <mat-icon>image</mat-icon>
     Image
@@ -39,6 +59,39 @@
   </button>
 
   <mat-divider [vertical]="true" class="toolbar-divider"></mat-divider>
+
+  <!-- Document Statistics -->
+  <div class="doc-stats">
+    <span class="stat-item word-count-stat" (click)="openWordGoalDialog()" matTooltip="Click to set word goal">
+      <mat-icon class="stat-icon">article</mat-icon>
+      <span class="word-count-text">
+        {{ wordCount }} words
+        <span *ngIf="wordCountGoal > 0" class="word-goal-indicator">
+          / {{ wordCountGoal.toLocaleString() }}
+          <span class="goal-progress" [style.color]="getWordGoalColor()">
+            ({{ getWordGoalProgress() | number:'1.0-0' }}%)
+          </span>
+        </span>
+      </span>
+      <div *ngIf="wordCountGoal > 0" class="word-goal-bar">
+        <div class="word-goal-progress" [style.width.%]="getWordGoalProgress()" [style.background-color]="getWordGoalColor()"></div>
+      </div>
+    </span>
+    <span class="stat-item" matTooltip="Reading Time">
+      <mat-icon class="stat-icon">schedule</mat-icon>
+      {{ readingTime }} min
+    </span>
+  </div>
+
+  <mat-divider [vertical]="true" class="toolbar-divider"></mat-divider>
+
+  <button mat-icon-button (click)="toggleMetadataEditor()" matTooltip="Edit Metadata" [class.active]="showMetadataEditor">
+    <mat-icon>info</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="toggleVersionHistory()" matTooltip="Version History" [class.active]="showVersionHistory">
+    <mat-icon>history</mat-icon>
+  </button>
 
   <button mat-icon-button (click)="toggleGallery()" matTooltip="Toggle Image Gallery">
     <mat-icon>{{ showGallery ? 'photo_library' : 'collections' }}</mat-icon>
@@ -52,32 +105,220 @@
     <mat-icon>{{ showPreview ? 'visibility' : 'visibility_off' }}</mat-icon>
   </button>
 
+  <button mat-icon-button (click)="toggleSyncScroll()" matTooltip="Toggle Synchronized Scrolling" [class.active]="syncScroll">
+    <mat-icon>sync</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="toggleDistractionFree()" matTooltip="Distraction-Free Mode (Cmd+Shift+D)" [class.active]="distractionFree">
+    <mat-icon>center_focus_strong</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="toggleTypewriterMode()" matTooltip="Typewriter Mode (Cmd+Shift+T)" [class.active]="typewriterMode">
+    <mat-icon>vertical_align_center</mat-icon>
+  </button>
+
+  <button mat-icon-button (click)="toggleSplitMode()" matTooltip="Toggle split direction">
+    <mat-icon>{{ splitMode === 'horizontal' ? 'view_column' : 'view_stream' }}</mat-icon>
+  </button>
+
   <button mat-icon-button (click)="toggleFullscreen()" matTooltip="Toggle Fullscreen (F11)">
     <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
   </button>
 </mat-toolbar>
 
-<!-- Three-Pane Layout -->
-<div class="studio-container" [class.fullscreen]="isFullscreen">
+<!-- Find and Replace Panel -->
+<div class="find-replace-panel" *ngIf="showFindReplace">
+  <div class="find-replace-row">
+    <input
+      type="text"
+      [(ngModel)]="findText"
+      (ngModelChange)="findInEditor()"
+      (keydown.enter)="findNext()"
+      placeholder="Find..."
+      class="find-input">
+    <span class="find-count" *ngIf="findText">
+      {{ findResults.length > 0 ? (currentFindIndex + 1) + ' of ' + findResults.length : 'No results' }}
+    </span>
+    <button mat-icon-button (click)="findPrevious()" [disabled]="findResults.length === 0" matTooltip="Previous (Shift+Enter)">
+      <mat-icon>keyboard_arrow_up</mat-icon>
+    </button>
+    <button mat-icon-button (click)="findNext()" [disabled]="findResults.length === 0" matTooltip="Next (Enter)">
+      <mat-icon>keyboard_arrow_down</mat-icon>
+    </button>
+  </div>
+  <div class="find-replace-row">
+    <input
+      type="text"
+      [(ngModel)]="replaceText"
+      placeholder="Replace..."
+      class="replace-input">
+    <button mat-stroked-button (click)="replaceCurrent()" [disabled]="findResults.length === 0">Replace</button>
+    <button mat-stroked-button (click)="replaceAll()" [disabled]="findResults.length === 0">Replace All</button>
+  </div>
+  <div class="find-options">
+    <label class="find-option">
+      <input type="checkbox" [(ngModel)]="findCaseSensitive" (ngModelChange)="findInEditor()">
+      Case sensitive
+    </label>
+    <label class="find-option">
+      <input type="checkbox" [(ngModel)]="findWholeWord" (ngModelChange)="findInEditor()">
+      Whole word
+    </label>
+    <button mat-icon-button (click)="toggleFindReplace()" matTooltip="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+</div>
 
-  <!-- Left Sidebar (TOC) -->
-  <aside class="sidebar" *ngIf="showSidebar" #sidebar>
-    <div class="sidebar-header">
-      <h3>Table of Contents</h3>
+<!-- Command Palette -->
+<div class="command-palette-overlay" *ngIf="showCommandPalette" (click)="toggleCommandPalette()">
+  <div class="command-palette" (click)="$event.stopPropagation()">
+    <div class="command-palette-header">
+      <input
+        type="text"
+        [(ngModel)]="commandSearch"
+        (ngModelChange)="filterCommands()"
+        placeholder="Type a command..."
+        class="command-search"
+        #commandInput
+        autofocus>
     </div>
-    <div class="sidebar-content">
-      <div *ngIf="tocItems.length === 0" class="placeholder-text">
-        Start typing headings to build the table of contents...
-      </div>
-      <nav *ngIf="tocItems.length > 0" class="toc-nav">
-        <div
-          *ngFor="let item of tocItems"
-          class="toc-item toc-level-{{ item.level }}"
-          (click)="scrollToHeading(item.id)"
-          [attr.title]="item.text">
-          {{ item.text }}
+    <div class="command-list">
+      <div
+        *ngFor="let cmd of filteredCommands; let i = index"
+        class="command-item"
+        [class.selected]="i === selectedCommandIndex"
+        (click)="executeCommand(cmd)"
+        (mouseenter)="selectedCommandIndex = i">
+        <mat-icon class="command-icon">{{ cmd.icon }}</mat-icon>
+        <div class="command-info">
+          <div class="command-name">{{ cmd.name }}</div>
+          <div class="command-description">{{ cmd.description }}</div>
         </div>
-      </nav>
+        <div class="command-shortcut" *ngIf="cmd.shortcut">{{ cmd.shortcut }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Template Dialog -->
+<div class="template-dialog-overlay" *ngIf="showTemplateDialog" (click)="toggleTemplateDialog()">
+  <div class="template-dialog" (click)="$event.stopPropagation()">
+    <div class="template-dialog-header">
+      <h2>Choose a Template</h2>
+      <button mat-icon-button (click)="toggleTemplateDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="template-grid">
+      <div
+        *ngFor="let template of templates"
+        class="template-card"
+        (click)="applyTemplate(template)">
+        <mat-icon class="template-icon">{{ template.icon }}</mat-icon>
+        <div class="template-name">{{ template.name }}</div>
+        <div class="template-description">{{ template.description }}</div>
+        <div class="template-category">{{ template.category }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Three-Pane Layout -->
+<div class="studio-container" [class.fullscreen]="isFullscreen" [class.distraction-free]="distractionFree" [class.vertical-split]="splitMode === 'vertical'">
+
+  <!-- Left Sidebar (TOC / Metadata) -->
+  <aside class="sidebar" *ngIf="showSidebar" #sidebar>
+    <!-- Metadata Editor -->
+    <div *ngIf="showMetadataEditor" class="metadata-editor">
+      <div class="sidebar-header">
+        <h3>Document Metadata</h3>
+      </div>
+      <div class="sidebar-content">
+        <div class="metadata-form">
+          <div class="metadata-field">
+            <label>Title</label>
+            <input type="text" [(ngModel)]="metadata.title" (ngModelChange)="updateMetadataInContent()" placeholder="Document title">
+          </div>
+          <div class="metadata-field">
+            <label>Author</label>
+            <input type="text" [(ngModel)]="metadata.author" (ngModelChange)="updateMetadataInContent()" placeholder="Author name">
+          </div>
+          <div class="metadata-field">
+            <label>Date</label>
+            <input type="date" [(ngModel)]="metadata.date" (ngModelChange)="updateMetadataInContent()">
+          </div>
+          <div class="metadata-field">
+            <label>Tags</label>
+            <input type="text" [(ngModel)]="metadata.tags" (ngModelChange)="updateMetadataInContent()" placeholder="comma, separated, tags">
+          </div>
+          <div class="metadata-field">
+            <label>Description</label>
+            <textarea [(ngModel)]="metadata.description" (ngModelChange)="updateMetadataInContent()" rows="3" placeholder="Brief description"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table of Contents -->
+    <div *ngIf="!showMetadataEditor" class="toc-container">
+      <div class="sidebar-header">
+        <div class="sidebar-header-content">
+          <h3>Table of Contents</h3>
+          <div class="toc-controls">
+            <button mat-icon-button [matMenuTriggerFor]="depthMenu" matTooltip="Filter depth">
+              <mat-icon>filter_list</mat-icon>
+            </button>
+            <mat-menu #depthMenu="matMenu">
+              <button mat-menu-item (click)="setTocDepthFilter(2)">
+                <span>H1-H2 only</span>
+              </button>
+              <button mat-menu-item (click)="setTocDepthFilter(3)">
+                <span>H1-H3</span>
+              </button>
+              <button mat-menu-item (click)="setTocDepthFilter(4)">
+                <span>H1-H4</span>
+              </button>
+              <button mat-menu-item (click)="setTocDepthFilter(6)">
+                <span>All levels</span>
+              </button>
+            </mat-menu>
+            <button mat-icon-button (click)="expandAllTocItems()" matTooltip="Expand all">
+              <mat-icon>unfold_more</mat-icon>
+            </button>
+            <button mat-icon-button (click)="collapseAllTocItems()" matTooltip="Collapse all">
+              <mat-icon>unfold_less</mat-icon>
+            </button>
+            <button mat-icon-button (click)="copyTocToClipboard()" matTooltip="Copy TOC as markdown">
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-content">
+        <div *ngIf="tocItems.length === 0" class="placeholder-text">
+          Start typing headings to build the table of contents...
+        </div>
+        <nav *ngIf="tocItems.length > 0" class="toc-nav">
+          <div
+            *ngFor="let item of tocItems; let i = index"
+            class="toc-item toc-level-{{ item.level }}"
+            [class.has-children]="item.hasChildren"
+            [class.collapsed]="item.collapsed"
+            [class.hidden]="!isTocItemVisible(i)"
+            [attr.title]="item.text">
+            <span class="toc-item-content">
+              <mat-icon
+                *ngIf="item.hasChildren"
+                class="collapse-icon"
+                (click)="toggleTocItem(i); $event.stopPropagation()">
+                {{ item.collapsed ? 'chevron_right' : 'expand_more' }}
+              </mat-icon>
+              <span class="toc-text" (click)="scrollToHeading(item.id)">{{ item.text }}</span>
+            </span>
+          </div>
+        </nav>
+      </div>
     </div>
   </aside>
 
@@ -111,6 +352,7 @@
       [hasUnsavedChanges]="hasUnsavedChanges"
       [lastSavedAt]="lastSaved"
       [showSaveControls]="false"
+      [typewriterMode]="typewriterMode"
       (contentChange)="onContentChange()"
       (insertMarkdown)="insertMarkdown($event)"
       (undo)="performUndo()"
@@ -142,16 +384,212 @@
         <mat-icon>visibility</mat-icon>
         Preview
       </h3>
+
+      <!-- Theme Selector -->
+      <div class="preview-theme-selector">
+        <mat-icon class="theme-icon">palette</mat-icon>
+        <select
+          class="theme-dropdown"
+          [(ngModel)]="selectedTheme"
+          (ngModelChange)="changePreviewTheme($event)">
+          <option *ngFor="let theme of themes" [value]="theme.id">
+            {{ theme.name }}
+          </option>
+        </select>
+        <button mat-icon-button (click)="openThemeEditor()" matTooltip="Create custom theme" class="theme-editor-btn">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
     </div>
 
-    <div class="preview-container" #previewContainer>
-      <markdown [data]="previewContent" [disableSanitizer]="true"></markdown>
+    <div class="preview-container themed-preview" #previewContainer>
+      <article>
+        <markdown [data]="previewContent" [disableSanitizer]="true"></markdown>
+      </article>
     </div>
   </div>
 
   <!-- Gallery Pane -->
   <div class="gallery-pane" *ngIf="showGallery">
     <app-image-gallery (imageSelected)="onImageSelected($event)"></app-image-gallery>
+  </div>
+
+  <!-- Version History Pane -->
+  <div class="version-history-pane" *ngIf="showVersionHistory">
+    <div class="version-history-header">
+      <h3>
+        <mat-icon>history</mat-icon>
+        Version History
+      </h3>
+      <button mat-icon-button (click)="toggleVersionHistory()" matTooltip="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="version-history-controls">
+      <div class="auto-save-status">
+        <mat-icon [class.enabled]="autoSaveEnabled" class="status-icon">
+          {{ autoSaveEnabled ? 'check_circle' : 'pause_circle' }}
+        </mat-icon>
+        <span class="status-text">
+          Auto-save {{ autoSaveEnabled ? 'enabled' : 'disabled' }}
+        </span>
+        <button mat-icon-button (click)="toggleAutoSave()" [matTooltip]="autoSaveEnabled ? 'Disable auto-save' : 'Enable auto-save'">
+          <mat-icon>{{ autoSaveEnabled ? 'pause' : 'play_arrow' }}</mat-icon>
+        </button>
+      </div>
+      <button mat-button (click)="clearAllVersions()" [disabled]="versions.length === 0" class="clear-btn">
+        <mat-icon>delete_sweep</mat-icon>
+        Clear All
+      </button>
+    </div>
+
+    <div class="version-list">
+      <div *ngIf="versions.length === 0" class="no-versions">
+        <mat-icon>history_toggle_off</mat-icon>
+        <p>No version history yet</p>
+        <span>Versions are saved automatically every 30 seconds</span>
+      </div>
+
+      <div *ngFor="let version of versions" class="version-item">
+        <div class="version-info">
+          <div class="version-title">{{ version.title }}</div>
+          <div class="version-meta">
+            <span class="version-time">{{ getRelativeTime(version.timestamp) }}</span>
+            <span class="version-stats">{{ version.wordCount }} words · {{ version.charCount }} chars</span>
+          </div>
+          <div class="version-date">{{ version.timestamp | date:'medium' }}</div>
+        </div>
+        <div class="version-actions">
+          <button mat-icon-button (click)="restoreVersion(version)" matTooltip="Restore this version">
+            <mat-icon>restore</mat-icon>
+          </button>
+          <button mat-icon-button (click)="deleteVersion(version)" matTooltip="Delete this version">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EPUB Export Dialog -->
+  <div class="epub-dialog-overlay" *ngIf="showEpubDialog" (click)="closeEpubExportDialog()">
+    <div class="epub-dialog" (click)="$event.stopPropagation()">
+      <div class="epub-dialog-header">
+        <h2>
+          <mat-icon>book</mat-icon>
+          Export to EPUB
+        </h2>
+        <button mat-icon-button (click)="closeEpubExportDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="epub-dialog-content">
+        <div class="epub-option-group">
+          <label>Chapter Splitting</label>
+          <select [(ngModel)]="epubOptions.splitByHeading">
+            <option value="h1">Split by H1 headings</option>
+            <option value="h2">Split by H2 headings</option>
+            <option value="none">No splitting (single chapter)</option>
+          </select>
+          <span class="option-hint">How to divide the document into chapters</span>
+        </div>
+
+        <div class="epub-option-group">
+          <label>Font Family</label>
+          <select [(ngModel)]="epubOptions.fontFamily">
+            <option value="serif">Serif (Georgia, Times)</option>
+            <option value="sans-serif">Sans-serif (Helvetica, Arial)</option>
+          </select>
+        </div>
+
+        <div class="epub-option-group">
+          <label>Font Size</label>
+          <select [(ngModel)]="epubOptions.fontSize">
+            <option value="small">Small</option>
+            <option value="medium">Medium</option>
+            <option value="large">Large</option>
+          </select>
+        </div>
+
+        <div class="epub-option-checkboxes">
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="epubOptions.includeCoverPage">
+            Include cover page
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" [(ngModel)]="epubOptions.includeTableOfContents">
+            Include table of contents page
+          </label>
+        </div>
+
+        <div class="epub-metadata-info">
+          <h4>Document Info</h4>
+          <p><strong>Title:</strong> {{ documentTitle }}</p>
+          <p *ngIf="metadata.author"><strong>Author:</strong> {{ metadata.author }}</p>
+          <p><strong>Words:</strong> {{ wordCount }}</p>
+        </div>
+      </div>
+
+      <div class="epub-dialog-actions">
+        <button mat-button (click)="closeEpubExportDialog()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="exportToEpub()">
+          <mat-icon>download</mat-icon>
+          Export EPUB
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Theme Editor Dialog -->
+  <div class="theme-editor-overlay" *ngIf="showThemeEditor" (click)="closeThemeEditor()">
+    <div class="theme-editor-dialog" (click)="$event.stopPropagation()">
+      <app-theme-editor
+        (themeChanged)="onThemeEditorChange($event)"
+        (themeSaved)="onThemeEditorSaved($event)"
+        (closed)="closeThemeEditor()">
+      </app-theme-editor>
+    </div>
+  </div>
+
+  <!-- Word Goal Dialog -->
+  <div class="word-goal-overlay" *ngIf="showWordGoalDialog" (click)="closeWordGoalDialog()">
+    <div class="word-goal-dialog" (click)="$event.stopPropagation()">
+      <div class="word-goal-header">
+        <h3>
+          <mat-icon>flag</mat-icon>
+          Set Word Goal
+        </h3>
+        <button mat-icon-button (click)="closeWordGoalDialog()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="word-goal-content">
+        <p>Set a word count target for this writing session.</p>
+        <div class="word-goal-input-group">
+          <label>Target Words</label>
+          <input type="number" [(ngModel)]="tempWordGoal" min="0" step="100" placeholder="e.g., 1000">
+        </div>
+        <div class="word-goal-presets">
+          <span>Quick presets:</span>
+          <button mat-stroked-button (click)="tempWordGoal = 500">500</button>
+          <button mat-stroked-button (click)="tempWordGoal = 1000">1,000</button>
+          <button mat-stroked-button (click)="tempWordGoal = 2000">2,000</button>
+          <button mat-stroked-button (click)="tempWordGoal = 5000">5,000</button>
+        </div>
+        <div class="word-goal-current" *ngIf="wordCount > 0">
+          <mat-icon>info</mat-icon>
+          Current word count: {{ wordCount.toLocaleString() }}
+        </div>
+      </div>
+      <div class="word-goal-actions">
+        <button mat-button (click)="clearWordGoal()" *ngIf="wordCountGoal > 0">Clear Goal</button>
+        <span class="spacer"></span>
+        <button mat-button (click)="closeWordGoalDialog()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="setWordGoal()">Set Goal</button>
+      </div>
+    </div>
   </div>
 
 </div>
