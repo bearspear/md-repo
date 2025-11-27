@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
-import { SearchService } from './search.service';
-import { SearchStateService } from './search-state.service';
-import { CollectionService } from './collection.service';
-import { CollectionManagerService } from './collection-manager.service';
-import { SearchManagementService } from './search-management.service';
+import { SearchEngineService } from './search-engine.service';
+import { UserPreferencesEngineService } from './user-preferences-engine.service';
+import { ApplicationStateService } from './application-state.service';
+import { CollectionEngineService } from './collection-engine.service';
 
 /**
  * Callbacks for component interactions
@@ -21,11 +20,10 @@ export interface AppStateCallbacks {
 export class ApplicationStateInitializerService {
 
   constructor(
-    private searchService: SearchService,
-    private searchState: SearchStateService,
-    private collectionService: CollectionService,
-    private collectionManager: CollectionManagerService,
-    private searchManager: SearchManagementService
+    private searchEngine: SearchEngineService,
+    private userPrefs: UserPreferencesEngineService,
+    private appState: ApplicationStateService,
+    private collectionEngine: CollectionEngineService
   ) {}
 
   /**
@@ -34,31 +32,32 @@ export class ApplicationStateInitializerService {
    */
   initialize(callbacks: AppStateCallbacks): void {
     // Load stats
-    this.searchService.getStats().subscribe(stats => {
+    this.searchEngine.getStats().subscribe(stats => {
       callbacks.onStatsLoaded(stats.totalDocuments, stats.totalWords);
     });
 
     // Load topics for filtering
-    this.searchService.getTopics().subscribe(topics => {
-      this.searchState.setAvailableTopics(topics);
+    this.searchEngine.getTopics().subscribe(topics => {
+      this.appState.setAvailableTopics(topics);
     });
 
     // Load tags for filtering
-    this.searchService.getTags().subscribe(tags => {
-      this.searchState.setAvailableTags(tags);
+    this.searchEngine.getTags().subscribe(tags => {
+      this.appState.setAvailableTags(tags);
     });
 
     // Load available collection colors
-    const colors = this.collectionService.getAvailableColors();
+    const colors = this.collectionEngine.getAvailableColors();
     callbacks.onCollectionColorsLoaded(colors);
 
     // Setup debounced search
-    this.searchManager.setupDebouncedSearch(callbacks.onLoadCollectionsForResults);
+    this.searchEngine.setupDebouncedSearch(
+      callbacks.onLoadCollectionsForResults,
+      (q) => this.userPrefs.addToHistory(q)
+    );
 
     // Setup collection manager
-    const collectionColors = this.collectionManager.getAvailableColors();
-    callbacks.onCollectionColorsLoaded(collectionColors);
-    this.collectionManager.registerSearchCallback(callbacks.onPerformSearch);
+    this.collectionEngine.registerSearchCallback(callbacks.onPerformSearch);
   }
 
   /**
@@ -67,18 +66,18 @@ export class ApplicationStateInitializerService {
    */
   refresh(callbacks: AppStateCallbacks): void {
     // Reload stats
-    this.searchService.getStats().subscribe(stats => {
+    this.searchEngine.getStats().subscribe(stats => {
       callbacks.onStatsLoaded(stats.totalDocuments, stats.totalWords);
     });
 
     // Reload topics
-    this.searchService.getTopics().subscribe(topics => {
-      this.searchState.setAvailableTopics(topics);
+    this.searchEngine.getTopics().subscribe(topics => {
+      this.appState.setAvailableTopics(topics);
     });
 
     // Perform search if there's an active query
-    if (this.searchState.searchQuery.trim().length > 0) {
-      callbacks.onPerformSearch(this.searchState.searchQuery);
+    if (this.appState.searchQuery.trim().length > 0) {
+      callbacks.onPerformSearch(this.appState.searchQuery);
     }
   }
 }

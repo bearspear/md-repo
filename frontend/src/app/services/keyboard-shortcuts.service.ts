@@ -1,7 +1,6 @@
 import { Injectable, ElementRef } from '@angular/core';
-import { UIStateService } from './ui-state.service';
-import { DocumentStateService } from './document-state.service';
-import { FindReplaceService } from './find-replace.service';
+import { ApplicationStateService } from './application-state.service';
+import { UserPreferencesEngineService } from './user-preferences-engine.service';
 
 /**
  * Keyboard shortcut configuration for handlers
@@ -20,9 +19,8 @@ export interface KeyboardShortcutHandlers {
 export class KeyboardShortcutsService {
 
   constructor(
-    private uiState: UIStateService,
-    private docState: DocumentStateService,
-    private findReplace: FindReplaceService
+    private appState: ApplicationStateService,
+    private userPrefs: UserPreferencesEngineService
   ) {}
 
   /**
@@ -37,24 +35,24 @@ export class KeyboardShortcutsService {
 
     // "Escape" to close modals
     if (event.key === 'Escape') {
-      if (this.uiState.showFindReplace) {
-        this.uiState.setState('showFindReplace', false);
-        this.findReplace.findText = '';
-        this.findReplace.replaceText = '';
-        this.findReplace.currentMatchIndex = 0;
-        this.findReplace.totalMatches = 0;
-      } else if (this.uiState.showKeyboardShortcutsDialog) {
+      if (this.appState.showFindReplace) {
+        this.appState.setState('showFindReplace', false);
+        this.userPrefs.findText = '';
+        this.userPrefs.replaceText = '';
+        this.userPrefs.currentMatchIndex = 0;
+        this.userPrefs.totalMatches = 0;
+      } else if (this.appState.showKeyboardShortcutsDialog) {
         this.closeKeyboardShortcuts();
-      } else if (this.docState.selectedDocument) {
+      } else if (this.appState.selectedDocument) {
         handlers.onCloseDocument();
-      } else if (this.uiState.showUploadDialog) {
+      } else if (this.appState.showUploadDialog) {
         handlers.onCloseUploadDialog();
-      } else if (this.uiState.showSettingsDialog) {
+      } else if (this.appState.showSettingsDialog) {
         handlers.onCloseSettingsDialog();
-      } else if (this.uiState.showIndex) {
-        this.uiState.setState('showIndex', false);
-      } else if (this.uiState.showFilters) {
-        this.uiState.setState('showFilters', false);
+      } else if (this.appState.showIndex) {
+        this.appState.setState('showIndex', false);
+      } else if (this.appState.showFilters) {
+        this.appState.setState('showFilters', false);
       }
     }
 
@@ -83,13 +81,13 @@ export class KeyboardShortcutsService {
    * Show keyboard shortcuts dialog
    */
   showKeyboardShortcuts(): void {
-    this.uiState.setState('showKeyboardShortcutsDialog', true);
+    this.appState.setState('showKeyboardShortcutsDialog', true);
   }
 
   /**
    * Close keyboard shortcuts dialog
    */
   closeKeyboardShortcuts(): void {
-    this.uiState.setState('showKeyboardShortcutsDialog', false);
+    this.appState.setState('showKeyboardShortcutsDialog', false);
   }
 }

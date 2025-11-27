@@ -3,6 +3,7 @@ const mammoth = require('mammoth');
 const fs = require('fs').promises;
 const pdfParse = require('pdf-parse');
 const { JSDOM } = require('jsdom');
+const epubImporter = require('./epubImporter');
 
 /**
  * Document Conversion Service
@@ -23,12 +24,14 @@ class DocumentConverter {
    * Convert document to markdown based on file extension
    * @param {string} filePath - Path to the file
    * @param {string} mimeType - MIME type of the file
-   * @returns {Promise<string>} - Markdown content
+   * @returns {Promise<string|Object>} - Markdown content or object with markdown and embedded images
    */
   async convertToMarkdown(filePath, mimeType) {
     const extension = filePath.split('.').pop().toLowerCase();
 
     let markdown;
+    let embeddedImages = [];
+
     switch (extension) {
       case 'md':
       case 'markdown':
@@ -53,13 +56,19 @@ class DocumentConverter {
         break;
 
       case 'epub':
-        markdown = await this.convertEpubToMarkdown(filePath);
+        const epubResult = await this.convertEpubToMarkdown(filePath);
+        markdown = epubResult.markdown;
+        embeddedImages = epubResult.images || [];
         break;
 
       default:
         throw new Error(`Unsupported file type: ${extension}`);
     }
 
+    // Return object if there are embedded images, otherwise just markdown for backward compatibility
+    if (embeddedImages.length > 0) {
+      return { markdown, embeddedImages };
+    }
     return markdown;
   }
 
@@ -182,22 +191,20 @@ class DocumentConverter {
 
   /**
    * Convert EPUB file to Markdown
-   * Note: This is a simplified implementation
+   * @returns {Object} - { markdown, images }
    */
   async convertEpubToMarkdown(filePath) {
     try {
-      // For now, we'll provide a basic implementation
-      // A full EPUB parser would require additional libraries like epub-parser
-      // which might have compatibility issues
+      const result = await epubImporter.importEpub(filePath, {
+        extractImages: true,
+        preserveChapterStructure: true,
+        includeMetadata: true
+      });
 
-      // Read the file to check it exists
-      await fs.readFile(filePath);
-
-      // Return a placeholder message
-      return `# EPUB Document\n\n` +
-             `This is an EPUB file. Full EPUB conversion requires additional processing.\n\n` +
-             `File: ${filePath}\n\n` +
-             `_Note: Enhanced EPUB conversion will be added in a future update._`;
+      return {
+        markdown: result.markdown,
+        images: result.images || []
+      };
     } catch (error) {
       throw new Error(`EPUB conversion failed: ${error.message}`);
     }

@@ -1,17 +1,46 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { CollectionService, Collection } from './collection.service';
-import { SearchResult } from './search.service';
-import { SearchStateService } from './search-state.service';
+import { ApplicationStateService } from './application-state.service';
+import { SearchResult } from './search-engine.service';
 import { CollectionDialogComponent } from '../components/collection-dialog/collection-dialog.component';
 import { DocumentCollectionsDialogComponent } from '../components/document-collections-dialog/document-collections-dialog.component';
 import { CollectionsSidebarComponent } from '../components/collections-sidebar/collections-sidebar.component';
 
+// Types
+export interface Collection {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  documentCount: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface CollectionDocument {
+  path: string;
+  title: string;
+  tags: string[];
+  topics: string[];
+  contentType: string;
+  wordCount: number;
+  modifiedAt: number;
+}
+
+/**
+ * Consolidated collection engine service
+ * Combines HTTP operations and business logic orchestration
+ * Merges: CollectionService + CollectionManagerService
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class CollectionManagerService {
+export class CollectionEngineService {
+  private apiUrl = 'http://localhost:3011/api';
+
+  // State management (from CollectionManagerService)
   private selectedCollectionSubject = new BehaviorSubject<Collection | null>(null);
   public selectedCollection$: Observable<Collection | null> = this.selectedCollectionSubject.asObservable();
 
@@ -19,17 +48,105 @@ export class CollectionManagerService {
   private onSearchCallback: ((query: string) => void) | null = null;
 
   constructor(
-    private collectionService: CollectionService,
-    private searchState: SearchStateService,
+    private http: HttpClient,
+    private appState: ApplicationStateService,
     private dialog: MatDialog
   ) {}
 
-  /**
-   * Get available collection colors
-   */
-  getAvailableColors(): string[] {
-    return this.collectionService.getAvailableColors();
+  // ============================================
+  // HTTP Operations (from CollectionService)
+  // ============================================
+
+  getAllCollections(): Observable<{ collections: Collection[] }> {
+    return this.http.get<{ collections: Collection[] }>(`${this.apiUrl}/collections`);
   }
+
+  getCollection(id: string): Observable<Collection> {
+    return this.http.get<Collection>(`${this.apiUrl}/collections/${id}`);
+  }
+
+  createCollection(collection: Partial<Collection>): Observable<{ message: string; id: string }> {
+    const id = this.generateId();
+    return this.http.post<{ message: string; id: string }>(`${this.apiUrl}/collections`, {
+      id,
+      ...collection
+    });
+  }
+
+  updateCollection(id: string, updates: Partial<Collection>): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/collections/${id}`, updates);
+  }
+
+  deleteCollection(id: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/collections/${id}`);
+  }
+
+  getCollectionDocuments(collectionId: string, limit = 100, offset = 0): Observable<{ documents: CollectionDocument[] }> {
+    return this.http.get<{ documents: CollectionDocument[] }>(
+      `${this.apiUrl}/collections/${collectionId}/documents?limit=${limit}&offset=${offset}`
+    );
+  }
+
+  getDocumentCollections(documentPath: string): Observable<{ collections: Collection[] }> {
+    return this.http.get<{ collections: Collection[] }>(
+      `${this.apiUrl}/documents/collections?documentPath=${encodeURIComponent(documentPath)}`
+    );
+  }
+
+  addDocumentToCollection(documentPath: string, collectionId: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/collections/${collectionId}/documents`,
+      { documentPath }
+    );
+  }
+
+  removeDocumentFromCollection(documentPath: string, collectionId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(
+      `${this.apiUrl}/collections/${collectionId}/documents`,
+      { body: { documentPath } }
+    );
+  }
+
+  addDocumentsToCollection(documentPaths: string[], collectionId: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/collections/${collectionId}/documents/bulk`,
+      { documentPaths, action: 'add' }
+    );
+  }
+
+  removeDocumentsFromCollection(documentPaths: string[], collectionId: string): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/collections/${collectionId}/documents/bulk`,
+      { documentPaths, action: 'remove' }
+    );
+  }
+
+  // ============================================
+  // Utility Methods
+  // ============================================
+
+  private generateId(): string {
+    return `col_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  getAvailableColors(): string[] {
+    return [
+      '#3b82f6', // blue
+      '#10b981', // green
+      '#f59e0b', // amber
+      '#ef4444', // red
+      '#8b5cf6', // violet
+      '#ec4899', // pink
+      '#06b6d4', // cyan
+      '#84cc16', // lime
+      '#f97316', // orange
+      '#6366f1'  // indigo
+    ];
+  }
+
+  // ============================================
+  // Business Logic Orchestration (from CollectionManagerService)
+  // ============================================
 
   /**
    * Get current selected collection
@@ -62,7 +179,7 @@ export class CollectionManagerService {
   /**
    * Open dialog to create a new collection
    */
-  createCollection(): void {
+  createCollectionDialog(): void {
     const dialogRef = this.dialog.open(CollectionDialogComponent, {
       width: '500px',
       data: {
@@ -73,7 +190,7 @@ export class CollectionManagerService {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.collectionService.createCollection(result).subscribe({
+        this.createCollection(result).subscribe({
           next: (response) => {
             console.log('Collection created:', response);
             this.refreshSidebar();
@@ -90,7 +207,7 @@ export class CollectionManagerService {
   /**
    * Open dialog to edit an existing collection
    */
-  editCollection(collection: Collection): void {
+  editCollectionDialog(collection: Collection): void {
     const dialogRef = this.dialog.open(CollectionDialogComponent, {
       width: '500px',
       data: {
@@ -102,7 +219,7 @@ export class CollectionManagerService {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.collectionService.updateCollection(collection.id, result).subscribe({
+        this.updateCollection(collection.id, result).subscribe({
           next: (response) => {
             console.log('Collection updated:', response);
             this.refreshSidebar();
@@ -119,10 +236,10 @@ export class CollectionManagerService {
   /**
    * Delete a collection with confirmation
    */
-  deleteCollection(collection: Collection): void {
+  deleteCollectionWithConfirm(collection: Collection): void {
     const confirmMessage = `Are you sure you want to delete the collection "${collection.name}"? This will not delete the documents, only the collection.`;
     if (confirm(confirmMessage)) {
-      this.collectionService.deleteCollection(collection.id).subscribe({
+      this.deleteCollection(collection.id).subscribe({
         next: () => {
           console.log('Collection deleted');
           // Clear selection if this was the selected collection
@@ -151,7 +268,7 @@ export class CollectionManagerService {
       this.filterSearchResultsByCollection(collection.id);
     } else if (!collection && hasSearched && this.onSearchCallback) {
       // Re-run search without collection filter
-      this.onSearchCallback(this.searchState.searchQuery);
+      this.onSearchCallback(this.appState.searchQuery);
     }
   }
 
@@ -179,8 +296,8 @@ export class CollectionManagerService {
    * Load collections for each search result
    */
   loadCollectionsForResults(): void {
-    this.searchState.searchResults.forEach(result => {
-      this.collectionService.getDocumentCollections(result.path).subscribe({
+    this.appState.searchResults.forEach(result => {
+      this.getDocumentCollections(result.path).subscribe({
         next: (response) => {
           result.collections = response.collections;
         },
@@ -196,14 +313,14 @@ export class CollectionManagerService {
    * Filter search results by collection
    */
   filterSearchResultsByCollection(collectionId: string): void {
-    this.collectionService.getCollectionDocuments(collectionId).subscribe({
+    this.getCollectionDocuments(collectionId).subscribe({
       next: (response) => {
         const collectionDocPaths = new Set(response.documents.map(d => d.path));
         // Filter current search results to only show documents in the collection
-        const filteredResults = this.searchState.searchResults.filter(result =>
+        const filteredResults = this.appState.searchResults.filter(result =>
           collectionDocPaths.has(result.path)
         );
-        this.searchState.setSearchResults(filteredResults);
+        this.appState.setSearchResults(filteredResults);
       },
       error: (error) => {
         console.error('Error filtering by collection:', error);

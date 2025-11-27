@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SearchResultWithCollections } from '../../services/search-state.service';
+import { SearchResultWithCollections } from '../../services/application-state.service';
 
 @Component({
   selector: 'app-search-result-card',

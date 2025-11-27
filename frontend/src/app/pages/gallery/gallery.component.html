@@ -1,0 +1,18 @@
+<div class="gallery-page">
+  <mat-toolbar color="primary" class="gallery-toolbar">
+    <button mat-icon-button routerLink="/studio" matTooltip="Back to Studio">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="toolbar-title">Image Gallery</span>
+    <span class="spacer"></span>
+    <button mat-icon-button routerLink="/" matTooltip="Home">
+      <mat-icon>home</mat-icon>
+    </button>
+  </mat-toolbar>
+
+  <div class="gallery-content">
+    <app-image-gallery
+      (imageSelected)="onImageSelected($event)">
+    </app-image-gallery>
+  </div>
+</div>

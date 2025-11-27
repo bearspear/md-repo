@@ -16,32 +16,14 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MarkdownModule } from 'ngx-markdown';
-import { SearchService, SearchResult, Topic, Tag } from './services/search.service';
-import { SearchManagementService } from './services/search-management.service';
-import { AnnotationService, Annotation } from './services/annotation.service';
-import { AnnotationManagerService } from './services/annotation-manager.service';
-import { CollectionService, Collection } from './services/collection.service';
-import { FavoritesService } from './services/favorites.service';
-import { SearchHistoryService } from './services/search-history.service';
-import { SearchHistoryInteractionService } from './services/search-history-interaction.service';
-import { RecentDocumentsService, RecentDoc } from './services/recent-documents.service';
-import { UIStateService } from './services/ui-state.service';
-import { DocumentStateService, TocItem } from './services/document-state.service';
-import { SearchStateService, SearchResultWithCollections } from './services/search-state.service';
-import { AnnotationStateService } from './services/annotation-state.service';
-import { AnnotationHighlightService } from './services/annotation-highlight.service';
-import { EditorStateService } from './services/editor-state.service';
-import { EditorManagerService } from './services/editor-manager.service';
-import { CollectionManagerService } from './services/collection-manager.service';
-import { FindReplaceService } from './services/find-replace.service';
-import { UploadManagerService } from './services/upload-manager.service';
-import { SavedSearchesService, SavedSearch } from './services/saved-searches.service';
-import { SavedSearchCoordinatorService } from './services/saved-search-coordinator.service';
-import { ExportManagerService } from './services/export-manager.service';
-import { SettingsManagerService } from './services/settings-manager.service';
-import { RelatedDocumentsManagerService } from './services/related-documents-manager.service';
-import { DocumentIndexService } from './services/document-index.service';
-import { DocumentNavigationService } from './services/document-navigation.service';
+import { SearchEngineService, SearchResult, Topic, Tag } from './services/search-engine.service';
+import { UserPreferencesEngineService, SavedSearch, RecentDoc } from './services/user-preferences-engine.service';
+import { AnnotationEngineService, Annotation } from './services/annotation-engine.service';
+import { CollectionEngineService, Collection } from './services/collection-engine.service';
+import { ApplicationStateService, TocItem, SearchResultWithCollections } from './services/application-state.service';
+import { EditorEngineService } from './services/editor-engine.service';
+import { ApplicationManagerService } from './services/application-manager.service';
+import { DocumentEngineService } from './services/document-engine.service';
 import { KeyboardShortcutsService, KeyboardShortcutHandlers } from './services/keyboard-shortcuts.service';
 import { ApplicationStateInitializerService, AppStateCallbacks } from './services/application-state-initializer.service';
 import { CollectionsSidebarComponent } from './components/collections-sidebar/collections-sidebar.component';
@@ -135,33 +117,15 @@ export class AppComponent implements OnInit, AfterViewChecked {
   availableCollectionColors: string[] = [];
 
   constructor(
-    private searchService: SearchService,
-    public searchManager: SearchManagementService,
-    private annotationService: AnnotationService,
-    public annotationManager: AnnotationManagerService,
-    private collectionService: CollectionService,
-    public favoritesService: FavoritesService,
-    public searchHistoryService: SearchHistoryService,
-    public searchHistoryInteraction: SearchHistoryInteractionService,
-    public recentDocumentsService: RecentDocumentsService,
-    public uiState: UIStateService,
-    public docState: DocumentStateService,
-    public searchState: SearchStateService,
-    public annotationState: AnnotationStateService,
-    private annotationHighlight: AnnotationHighlightService,
-    public editorState: EditorStateService,
-    public editorManager: EditorManagerService,
+    public searchEngine: SearchEngineService,
+    public userPrefs: UserPreferencesEngineService,
+    public annotationEngine: AnnotationEngineService,
+    public collectionEngine: CollectionEngineService,
+    public appState: ApplicationStateService,
+    public editorEngine: EditorEngineService,
     private dialog: MatDialog,
-    public collectionManager: CollectionManagerService,
-    public findReplace: FindReplaceService,
-    public uploadManager: UploadManagerService,
-    public savedSearchesService: SavedSearchesService,
-    public savedSearchCoordinator: SavedSearchCoordinatorService,
-    public exportManager: ExportManagerService,
-    public settingsManager: SettingsManagerService,
-    public relatedDocsManager: RelatedDocumentsManagerService,
-    public documentIndex: DocumentIndexService,
-    public docNav: DocumentNavigationService,
+    public appManager: ApplicationManagerService,
+    public documentEngine: DocumentEngineService,
     public keyboardShortcuts: KeyboardShortcutsService,
     private appStateInitializer: ApplicationStateInitializerService
   ) {}
@@ -184,12 +148,12 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   ngAfterViewChecked() {
     // Add IDs to headings for TOC navigation
-    if (this.docState.selectedDocument && this.documentContent) {
+    if (this.appState.selectedDocument && this.documentContent) {
       this.addIdsToHeadings();
     }
 
     // Apply highlights after the markdown content is rendered
-    if (this.docState.selectedDocument && this.docState.annotations.length > 0 && !this.annotationState.highlightsApplied) {
+    if (this.appState.selectedDocument && this.appState.annotations.length > 0 && !this.appState.highlightsApplied) {
       setTimeout(() => this.applyHighlights(), 100);
     }
   }
@@ -200,12 +164,12 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
     // Register collections sidebar
     if (this.collectionsSidebar) {
-      this.collectionManager.registerSidebar(this.collectionsSidebar);
+      this.collectionEngine.registerSidebar(this.collectionsSidebar);
     }
 
     // Register find input
     if (this.findInput) {
-      this.findReplace.registerFindInput(this.findInput);
+      this.userPrefs.registerFindInput(this.findInput);
     }
   }
 
@@ -213,110 +177,114 @@ export class AppComponent implements OnInit, AfterViewChecked {
   }
 
   onSearchInput(query: string) {
-    this.searchManager.onSearchInput(query);
+    this.searchEngine.onSearchInput(query);
   }
 
   performSearch(query: string) {
-    this.searchManager.performSearch(query, () => this.loadCollectionsForResults());
+    this.searchEngine.performSearch(
+      query,
+      () => this.loadCollectionsForResults(),
+      (q) => this.userPrefs.addToHistory(q)
+    );
   }
 
   toggleTopic(topic: string) {
-    this.searchManager.toggleTopic(topic);
+    this.searchEngine.toggleTopic(topic);
   }
 
   clearFilters() {
-    this.searchManager.clearFilters();
+    this.searchEngine.clearFilters();
   }
 
   toggleTag(tag: string) {
-    this.searchManager.toggleTag(tag);
+    this.searchEngine.toggleTag(tag);
   }
 
   isTagSelected(tag: string): boolean {
-    return this.searchManager.isTagSelected(tag);
+    return this.searchEngine.isTagSelected(tag);
   }
 
   onDateFilterChange() {
-    this.searchManager.onDateFilterChange();
+    this.searchEngine.onDateFilterChange();
   }
 
   onContentTypeChange() {
-    this.searchManager.onContentTypeChange();
+    this.searchEngine.onContentTypeChange();
   }
 
   hasActiveFilters(): boolean {
-    return this.searchManager.hasActiveFilters();
+    return this.searchEngine.hasActiveFilters();
   }
 
   isTopicSelected(topic: string): boolean {
-    return this.searchManager.isTopicSelected(topic);
+    return this.searchEngine.isTopicSelected(topic);
   }
 
   openDocument(result: SearchResult) {
-    this.docNav.openDocument(result, (doc) => this.addToRecentDocuments(doc), (topics) => this.findRelatedDocuments(topics), (path) => this.loadAnnotations(path));
+    this.documentEngine.openDocument(result, (doc) => this.addToRecentDocuments(doc), (topics) => this.findRelatedDocuments(topics), (path) => this.loadAnnotations(path));
   }
 
   closeDocument() {
-    this.docNav.closeDocument();
+    this.documentEngine.closeDocument();
   }
 
   // Document viewer methods
   generateToc(markdown: string): TocItem[] {
-    return this.docNav.generateToc(markdown);
+    return this.documentEngine.generateToc(markdown);
   }
 
   toggleFullscreen() {
-    this.docNav.toggleFullscreen();
+    this.documentEngine.toggleFullscreen();
   }
 
   toggleToc() {
-    this.docNav.toggleToc();
+    this.documentEngine.toggleToc();
   }
 
   cyclePreviewMode() {
-    this.editorState.cyclePreviewMode();
+    this.editorEngine.cyclePreviewMode();
   }
 
   async copyMarkdown() {
-    await this.docNav.copyMarkdown(this.docState.selectedDocument?.rawContent);
+    await this.documentEngine.copyMarkdown(this.appState.selectedDocument?.rawContent);
   }
 
   scrollToSection(id: string) {
-    this.docNav.scrollToSection(id, this.documentContent);
+    this.documentEngine.scrollToSection(id, this.documentContent);
   }
 
   // Add IDs to rendered headings for TOC navigation
   addIdsToHeadings() {
-    this.docNav.addIdsToHeadings(this.documentContent);
+    this.documentEngine.addIdsToHeadings(this.documentContent);
   }
 
   printDocument() {
-    this.docNav.printDocument();
+    this.documentEngine.printDocument();
   }
 
   formatDate(timestamp: number): string {
-    return this.docNav.formatDate(timestamp);
+    return this.documentEngine.formatDate(timestamp);
   }
 
   // Upload methods
   onFileSelected(event: Event) {
-    this.uploadManager.onFileSelected(event);
+    this.appManager.onFileSelected(event);
   }
 
   onDragOver(event: DragEvent) {
-    this.uploadManager.onDragOver(event);
+    this.appManager.onDragOver(event);
   }
 
   onDragLeave(event: DragEvent) {
-    this.uploadManager.onDragLeave(event);
+    this.appManager.onDragLeave(event);
   }
 
   onDrop(event: DragEvent) {
-    this.uploadManager.onDrop(event);
+    this.appManager.onDrop(event);
   }
 
   uploadFiles(files: File[]) {
-    this.uploadManager.uploadFiles(files, () => this.refreshDocuments());
+    this.appManager.uploadFiles(files, () => this.refreshDocuments());
   }
 
   refreshDocuments() {
@@ -336,75 +304,79 @@ export class AppComponent implements OnInit, AfterViewChecked {
   }
 
   closeUploadDialog() {
-    this.uploadManager.closeUploadDialog();
+    this.appManager.closeUploadDialog();
   }
 
   // Settings methods
   openSettingsDialog() {
-    this.settingsManager.openSettingsDialog();
+    this.appManager.openSettingsDialog();
   }
 
   loadConfig() {
-    this.settingsManager.loadConfig();
+    this.appManager.loadConfig();
   }
 
   updateWatchDirectory() {
-    this.settingsManager.updateWatchDirectory(() => this.refreshDocuments());
+    this.appManager.updateWatchDirectory(() => this.refreshDocuments());
   }
 
   closeSettingsDialog() {
-    this.settingsManager.closeSettingsDialog();
+    this.appManager.closeSettingsDialog();
   }
 
   // Search History methods
   addToSearchHistory(query: string) {
-    this.searchHistoryInteraction.addToSearchHistory(query);
+    this.userPrefs.addToHistory(query);
   }
 
   useSearchHistory(query: string) {
-    this.searchHistoryInteraction.useSearchHistory(query, (q) => this.performSearch(q));
+    this.userPrefs.useFromHistory(query, (q) => this.performSearch(q));
   }
 
   clearSearchHistory() {
-    this.searchHistoryInteraction.clearSearchHistory();
+    this.userPrefs.clearHistory();
   }
 
   // Saved Searches
   saveCurrentSearch(name: string) {
-    this.savedSearchCoordinator.saveCurrentSearch(name);
+    this.userPrefs.saveCurrentSearch(name, this.searchEngine.selectedContentType);
   }
 
   applySavedSearch(search: any) {
-    this.savedSearchCoordinator.applySavedSearch(search, (q) => this.performSearch(q));
+    this.userPrefs.applySavedSearch(
+      search,
+      (q) => this.performSearch(q),
+      (type) => this.searchEngine.selectedContentType = type
+    );
   }
 
   deleteSavedSearch(index: number) {
-    this.savedSearchCoordinator.deleteSavedSearch(index);
+    this.userPrefs.deleteSavedSearch(index);
   }
 
   promptAndSaveSearch() {
-    this.savedSearchCoordinator.promptAndSaveSearch();
+    this.userPrefs.promptAndSaveCurrentSearch(this.searchEngine.selectedContentType);
   }
 
   onSearchFocus() {
-    this.searchHistoryInteraction.onSearchFocus();
+    this.userPrefs.onSearchFocus();
   }
 
   onSearchBlur() {
-    this.searchHistoryInteraction.onSearchBlur();
+    this.userPrefs.onSearchBlur();
   }
 
   // Favorites methods
   toggleFavorite(path: string) {
-    this.favoritesService.toggle(path);
+    this.userPrefs.toggleFavorite(path);
   }
 
   isFavorite(path: string): boolean {
-    return this.favoritesService.isFavorite(path);
+    return this.userPrefs.isFavorite(path);
   }
 
   openFavoriteDocument(path: string) {
-    const result = this.searchState.searchResults.find(r => r.path === path);
+    const result = this.appState.searchResults.find(r => r.path === path);
     if (result) {
       this.openDocument(result);
     }
@@ -412,38 +384,38 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   // Recent documents methods
   addToRecentDocuments(doc: RecentDoc) {
-    this.recentDocumentsService.add(doc);
+    this.userPrefs.addRecent(doc);
   }
 
   clearRecentDocuments() {
-    this.recentDocumentsService.clear();
-    this.uiState.setState('showRecent', false);
+    this.userPrefs.clearRecent();
+    this.appState.setState('showRecent', false);
   }
 
   openRecentDocument(doc: RecentDoc) {
-    this.docNav.openRecentDocument(doc, (d) => this.addToRecentDocuments(d), (topics) => this.findRelatedDocuments(topics));
+    this.documentEngine.openRecentDocument(doc, (d) => this.addToRecentDocuments(d), (topics) => this.findRelatedDocuments(topics));
   }
 
   // Related documents
   findRelatedDocuments(currentTopics: string[]) {
-    this.relatedDocsManager.findRelatedDocuments(currentTopics);
+    this.appManager.findRelatedDocuments(currentTopics);
   }
 
   // Index page methods
   toggleIndex() {
-    this.documentIndex.toggleIndex();
+    this.documentEngine.toggleIndex();
   }
 
   loadAllDocuments() {
-    this.documentIndex.loadAllDocuments();
+    this.documentEngine.loadAllDocuments();
   }
 
   groupDocumentsByLetter() {
-    this.documentIndex.groupDocumentsByLetter();
+    this.documentEngine.groupDocumentsByLetter();
   }
 
   openDocumentFromIndex(doc: SearchResult) {
-    this.documentIndex.openDocumentFromIndex(doc, (d) => this.openDocument(d));
+    this.documentEngine.openDocumentFromIndex(doc, (d) => this.openDocument(d));
   }
 
   // Keyboard shortcuts
@@ -460,97 +432,97 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   // Annotation methods
   loadAnnotations(documentPath: string) {
-    this.annotationManager.loadAnnotations(documentPath);
+    this.annotationEngine.loadAnnotations(documentPath);
   }
 
   applyHighlights() {
-    this.annotationManager.applyHighlights(this.documentContent, this.editAnnotation.bind(this));
+    this.annotationEngine.applyHighlights(this.documentContent, this.editAnnotation.bind(this));
   }
 
   onTextSelection() {
-    this.annotationManager.onTextSelection();
+    this.annotationEngine.onTextSelection();
   }
 
   saveAnnotation() {
-    this.annotationManager.saveAnnotation(() => {});
+    this.annotationEngine.saveAnnotation(() => {});
   }
 
   editAnnotation(annotation: Annotation) {
-    this.annotationManager.editAnnotation(annotation);
+    this.annotationEngine.editAnnotation(annotation);
   }
 
   deleteAnnotation(annotation: Annotation) {
-    this.annotationManager.deleteAnnotation(annotation);
+    this.annotationEngine.deleteAnnotationWithConfirm(annotation);
   }
 
   closeAnnotationDialog() {
-    this.annotationManager.closeAnnotationDialog();
+    this.annotationEngine.closeAnnotationDialog();
   }
 
   // Export methods
   exportAnnotationsAsJSON() {
-    this.exportManager.exportAnnotationsAsJSON(
-      this.docState.annotations,
-      this.docState.selectedDocument?.title,
-      this.docState.selectedDocument?.path
+    this.appManager.exportAnnotationsAsJSON(
+      this.appState.annotations,
+      this.appState.selectedDocument?.title,
+      this.appState.selectedDocument?.path
     );
   }
 
   exportAnnotationsAsCSV() {
-    this.exportManager.exportAnnotationsAsCSV(
-      this.docState.annotations,
-      this.docState.selectedDocument?.title
+    this.appManager.exportAnnotationsAsCSV(
+      this.appState.annotations,
+      this.appState.selectedDocument?.title
     );
   }
 
   exportSearchResults(format: 'json' | 'csv') {
-    this.exportManager.exportSearchResults(
-      this.searchState.searchResults,
-      this.searchState.searchQuery,
+    this.appManager.exportSearchResults(
+      this.appState.searchResults,
+      this.appState.searchQuery,
       format
     );
   }
 
   // Document Editing Methods
   toggleEditMode() {
-    this.editorManager.toggleEditMode();
+    this.editorEngine.toggleEditMode();
   }
 
   onContentChange() {
-    this.editorManager.onContentChange();
+    this.editorEngine.onContentChange();
   }
 
   saveDocument() {
-    this.editorManager.saveDocument();
+    this.editorEngine.saveDocument();
   }
 
   discardChanges() {
-    this.editorManager.discardChanges();
+    this.editorEngine.discardChanges();
   }
 
   insertMarkdown(type: string) {
-    this.editorManager.insertMarkdown(type);
+    this.editorEngine.insertMarkdown(type);
   }
 
   // Find & Replace Methods
   toggleFindReplace(withReplace: boolean = false) {
-    this.findReplace.toggle(withReplace);
+    this.userPrefs.toggleFindReplace(withReplace);
   }
 
   findNext() {
-    this.findReplace.findNext();
+    this.userPrefs.findNext();
   }
 
   findPrevious() {
-    this.findReplace.findPrevious();
+    this.userPrefs.findPrevious();
   }
 
   replaceNext() {
-    this.findReplace.replaceNext();
+    this.userPrefs.replaceNext();
   }
 
   replaceAll() {
-    this.findReplace.replaceAll();
+    this.userPrefs.replaceAll();
   }
 
   // Keyboard Shortcuts Dialog Methods
@@ -564,30 +536,30 @@ export class AppComponent implements OnInit, AfterViewChecked {
 
   // Collection Methods
   onCreateCollection() {
-    this.collectionManager.createCollection();
+    this.collectionEngine.createCollectionDialog();
   }
 
   onEditCollection(collection: Collection) {
-    this.collectionManager.editCollection(collection);
+    this.collectionEngine.editCollectionDialog(collection);
   }
 
   onDeleteCollection(collection: Collection) {
-    this.collectionManager.deleteCollection(collection);
+    this.collectionEngine.deleteCollectionWithConfirm(collection);
   }
 
   onCollectionSelected(collection: Collection | null) {
-    this.collectionManager.selectCollection(collection, this.searchManager.hasSearched);
+    this.collectionEngine.selectCollection(collection, this.searchEngine.hasSearched);
   }
 
   openDocumentCollectionsDialog(document: SearchResult) {
-    this.collectionManager.openDocumentCollectionsDialog(document);
+    this.collectionEngine.openDocumentCollectionsDialog(document);
   }
 
   loadCollectionsForResults() {
-    this.collectionManager.loadCollectionsForResults();
+    this.collectionEngine.loadCollectionsForResults();
   }
 
   filterSearchResultsByCollection(collectionId: string) {
-    this.collectionManager.filterSearchResultsByCollection(collectionId);
+    this.collectionEngine.filterSearchResultsByCollection(collectionId);
   }
 }

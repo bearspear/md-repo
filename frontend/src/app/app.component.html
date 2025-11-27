@@ -2,17 +2,17 @@
   [title]="title"
   [totalDocuments]="totalDocuments"
   [totalWords]="totalWords"
-  [showIndex]="uiState.showIndex"
-  [showCollections]="uiState.showCollections"
-  [showFavorites]="uiState.showFavorites"
-  [showRecent]="uiState.showRecent"
-  [favoritesCount]="favoritesService.getFavorites().length"
-  [recentCount]="recentDocumentsService.getRecent().length"
+  [showIndex]="appState.showIndex"
+  [showCollections]="appState.showCollections"
+  [showFavorites]="appState.showFavorites"
+  [showRecent]="appState.showRecent"
+  [favoritesCount]="userPrefs.getFavorites().length"
+  [recentCount]="userPrefs.getRecent().length"
   (toggleIndex)="toggleIndex()"
-  (toggleCollections)="uiState.toggle('showCollections')"
-  (toggleFavorites)="uiState.toggle('showFavorites')"
-  (toggleRecent)="uiState.toggle('showRecent')"
-  (openUploadDialog)="uiState.setState('showUploadDialog', true)"
+  (toggleCollections)="appState.toggle('showCollections')"
+  (toggleFavorites)="appState.toggle('showFavorites')"
+  (toggleRecent)="appState.toggle('showRecent')"
+  (openUploadDialog)="appState.setState('showUploadDialog', true)"
   (openSettings)="openSettingsDialog()">
 </app-toolbar>
 
@@ -25,47 +25,47 @@
         <mat-label>Search documents...</mat-label>
         <input matInput
                #searchInput
-               [(ngModel)]="searchState.searchQuery"
+               [(ngModel)]="appState.searchQuery"
                (input)="onSearchInput(searchInput.value)"
                (focus)="onSearchFocus()"
                (blur)="onSearchBlur()"
                placeholder="Try: angular, search, database..."
                autofocus>
-        <button mat-icon-button matSuffix (click)="uiState.toggle('showSearchHelp')" matTooltip="Search Help">
+        <button mat-icon-button matSuffix (click)="appState.toggle('showSearchHelp')" matTooltip="Search Help">
           <mat-icon>help_outline</mat-icon>
         </button>
       </mat-form-field>
 
       <!-- Search History Dropdown -->
-      <app-search-history-dropdown *ngIf="uiState.showSearchHistory && searchHistoryService.getHistory().length > 0" [history]="searchHistoryService.getHistory()" (selectHistory)="useSearchHistory($event)" (clear)="clearSearchHistory()"></app-search-history-dropdown>
+      <app-search-history-dropdown *ngIf="appState.showSearchHistory && userPrefs.getHistory().length > 0" [history]="userPrefs.getHistory()" (selectHistory)="useSearchHistory($event)" (clear)="clearSearchHistory()"></app-search-history-dropdown>
 
       <!-- Search Help Panel -->
-      <app-search-help-panel *ngIf="uiState.showSearchHelp" (close)="uiState.setState('showSearchHelp', false)"></app-search-help-panel>
+      <app-search-help-panel *ngIf="appState.showSearchHelp" (close)="appState.setState('showSearchHelp', false)"></app-search-help-panel>
     </div>
 
     <!-- Advanced Filters Section -->
     <div class="filter-actions-inline" style="display: flex; justify-content: center; margin-top: 1rem;">
-      <button mat-button (click)="uiState.toggle('showSavedSearches')" *ngIf="savedSearchesService.getAll().length > 0">
+      <button mat-button (click)="appState.toggle('showSavedSearches')" *ngIf="userPrefs.getSavedSearches().length > 0">
         <mat-icon>bookmark</mat-icon>
-        Saved Searches ({{savedSearchesService.getAll().length}})
+        Saved Searches ({{userPrefs.getSavedSearches().length}})
       </button>
     </div>
 
     <!-- Saved Searches Panel -->
-    <app-saved-searches-panel *ngIf="uiState.showSavedSearches && savedSearchesService.getAll().length > 0" [savedSearches]="savedSearchesService.getAll()" (apply)="applySavedSearch($event)" (delete)="deleteSavedSearch($event)"></app-saved-searches-panel>
+    <app-saved-searches-panel *ngIf="appState.showSavedSearches && userPrefs.getSavedSearches().length > 0" [savedSearches]="userPrefs.getSavedSearches()" (apply)="applySavedSearch($event)" (delete)="deleteSavedSearch($event)"></app-saved-searches-panel>
 
     <app-search-filters-container
-      [showFilters]="uiState.showAdvancedFilters"
+      [showFilters]="appState.showAdvancedFilters"
       [hasActiveFilters]="hasActiveFilters()"
-      [availableTopics]="searchState.availableTopics"
-      [availableTags]="searchState.availableTags"
-      [selectedTopics]="searchState.selectedTopics"
-      [selectedTags]="searchState.selectedTags"
-      [contentType]="searchManager.selectedContentType"
-      [dateFrom]="searchState.dateFrom"
-      [dateTo]="searchState.dateTo"
-      [canSaveSearch]="!!(searchState.searchQuery && searchManager.hasSearched)"
-      (toggleFilters)="uiState.toggle('showAdvancedFilters')"
+      [availableTopics]="appState.availableTopics"
+      [availableTags]="appState.availableTags"
+      [selectedTopics]="appState.selectedTopics"
+      [selectedTags]="appState.selectedTags"
+      [contentType]="searchEngine.selectedContentType"
+      [dateFrom]="appState.dateFrom"
+      [dateTo]="appState.dateTo"
+      [canSaveSearch]="!!(appState.searchQuery && searchEngine.hasSearched)"
+      (toggleFilters)="appState.toggle('showAdvancedFilters')"
       (clearFilters)="clearFilters()"
       (toggleTopic)="toggleTopic($event)"
       (toggleTag)="toggleTag($event)"
@@ -76,8 +76,8 @@
 
     <!-- Collections Panel -->
     <app-collections-panel
-      *ngIf="uiState.showCollections"
-      (close)="uiState.setState('showCollections', false)"
+      *ngIf="appState.showCollections"
+      (close)="appState.setState('showCollections', false)"
       (createCollection)="onCreateCollection()"
       (editCollection)="onEditCollection($event)"
       (deleteCollection)="onDeleteCollection($event)"
@@ -85,34 +85,34 @@
     </app-collections-panel>
 
     <!-- Favorites Panel -->
-    <app-favorites-panel *ngIf="uiState.showFavorites" [favorites]="favoritesService.getFavorites()" (openDocument)="openFavoriteDocument($event)" (toggleFavorite)="toggleFavorite($event)"></app-favorites-panel>
+    <app-favorites-panel *ngIf="appState.showFavorites" [favorites]="userPrefs.getFavorites()" (openDocument)="openFavoriteDocument($event)" (toggleFavorite)="toggleFavorite($event)"></app-favorites-panel>
 
     <!-- Recent Documents Panel -->
-    <app-recent-documents-panel *ngIf="uiState.showRecent" [recentDocs]="recentDocumentsService.getRecent()" (openDocument)="openRecentDocument($event)" (clear)="clearRecentDocuments()"></app-recent-documents-panel>
+    <app-recent-documents-panel *ngIf="appState.showRecent" [recentDocs]="userPrefs.getRecent()" (openDocument)="openRecentDocument($event)" (clear)="clearRecentDocuments()"></app-recent-documents-panel>
   </div>
 
   <!-- Loading Spinner -->
-  <div *ngIf="uiState.isSearching" class="loading">
+  <div *ngIf="appState.isSearching" class="loading">
     <mat-spinner diameter="50"></mat-spinner>
   </div>
 
   <!-- Search Results -->
-  <div *ngIf="!uiState.isSearching && searchManager.hasSearched" class="results-section">
+  <div *ngIf="!appState.isSearching && searchEngine.hasSearched" class="results-section">
     <app-search-results-header
-      *ngIf="searchState.searchResults.length > 0"
-      [resultCount]="searchState.searchResults.length"
-      [searchQuery]="searchState.searchQuery"
+      *ngIf="appState.searchResults.length > 0"
+      [resultCount]="appState.searchResults.length"
+      [searchQuery]="appState.searchQuery"
       (exportJSON)="exportSearchResults('json')"
       (exportCSV)="exportSearchResults('csv')">
     </app-search-results-header>
 
     <app-no-results-message
-      *ngIf="searchState.searchResults.length === 0"
-      [searchQuery]="searchState.searchQuery">
+      *ngIf="appState.searchResults.length === 0"
+      [searchQuery]="appState.searchQuery">
     </app-no-results-message>
 
     <app-search-result-card
-      *ngFor="let result of searchState.searchResults"
+      *ngFor="let result of appState.searchResults"
       [result]="result"
       [isFavorite]="isFavorite(result.path)"
       (openDocument)="openDocument($event)"
@@ -122,14 +122,14 @@
   </div>
 
   <!-- Welcome Message -->
-  <app-welcome-message *ngIf="!searchManager.hasSearched && !uiState.showIndex"></app-welcome-message>
+  <app-welcome-message *ngIf="!searchEngine.hasSearched && !appState.showIndex"></app-welcome-message>
 
   <!-- Document Index -->
   <app-document-index
-    *ngIf="uiState.showIndex"
-    [alphabetSections]="documentIndex.alphabetSections"
-    [groupedDocuments]="documentIndex.groupedDocuments"
-    [totalDocuments]="documentIndex.allDocuments.length"
+    *ngIf="appState.showIndex"
+    [alphabetSections]="documentEngine.alphabetSections"
+    [groupedDocuments]="documentEngine.groupedDocuments"
+    [totalDocuments]="documentEngine.allDocuments.length"
     [favoriteChecker]="isFavorite.bind(this)"
     (openDocument)="openDocumentFromIndex($event)"
     (toggleFavorite)="toggleFavorite($event)">
@@ -137,18 +137,18 @@
 </div>
 
 <!-- Document Viewer Modal -->
-<div *ngIf="docState.selectedDocument" class="document-modal" [class.fullscreen]="uiState.isFullscreen" (click)="closeDocument()">
+<div *ngIf="appState.selectedDocument" class="document-modal" [class.fullscreen]="appState.isFullscreen" (click)="closeDocument()">
   <div class="document-viewer" (click)="$event.stopPropagation()">
     <app-document-toolbar
-      [title]="docState.selectedDocument.title"
-      [path]="docState.selectedDocument.path"
-      [isEditMode]="uiState.isEditMode"
-      [previewMode]="editorState.previewMode"
-      [annotationsCount]="docState.annotations.length"
-      [showToc]="uiState.showToc"
-      [hasToc]="docState.documentToc.length > 0"
-      [copySuccess]="docNav.copySuccess"
-      [isFullscreen]="uiState.isFullscreen"
+      [title]="appState.selectedDocument.title"
+      [path]="appState.selectedDocument.path"
+      [isEditMode]="appState.isEditMode"
+      [previewMode]="editorEngine.previewMode"
+      [annotationsCount]="appState.annotations.length"
+      [showToc]="appState.showToc"
+      [hasToc]="appState.documentToc.length > 0"
+      [copySuccess]="documentEngine.copySuccess"
+      [isFullscreen]="appState.isFullscreen"
       (toggleEditMode)="toggleEditMode()"
       (cyclePreviewMode)="cyclePreviewMode()"
       (toggleToc)="toggleToc()"
@@ -162,31 +162,31 @@
     <div class="document-body">
       <!-- Table of Contents -->
       <app-table-of-contents
-        *ngIf="docState.documentToc.length > 0 && uiState.showToc"
-        [tocItems]="docState.documentToc"
+        *ngIf="appState.documentToc.length > 0 && appState.showToc"
+        [tocItems]="appState.documentToc"
         (scrollTo)="scrollToSection($event)">
       </app-table-of-contents>
 
       <!-- Document Content -->
       <div class="document-content"
            #documentContent
-           [class.with-toc]="docState.documentToc.length > 0 && uiState.showToc && !uiState.isEditMode"
-           [class.editor-mode]="uiState.isEditMode">
+           [class.with-toc]="appState.documentToc.length > 0 && appState.showToc && !appState.isEditMode"
+           [class.editor-mode]="appState.isEditMode">
 
         <!-- Editor Mode -->
         <app-markdown-editor
-          *ngIf="uiState.isEditMode"
-          [(editedContent)]="docState.editedContent"
-          [previewMode]="editorState.previewMode"
-          [isSaving]="uiState.isSaving"
-          [hasUnsavedChanges]="docState.hasUnsavedChanges"
-          [lastSavedAt]="docState.lastSavedAt"
-          [showFindReplace]="uiState.showFindReplace"
-          [showReplace]="uiState.showReplace"
-          [(findText)]="findReplace.findText"
-          [(replaceText)]="findReplace.replaceText"
-          [currentMatchIndex]="findReplace.currentMatchIndex"
-          [totalMatches]="findReplace.totalMatches"
+          *ngIf="appState.isEditMode"
+          [(editedContent)]="appState.editedContent"
+          [previewMode]="editorEngine.previewMode"
+          [isSaving]="appState.isSaving"
+          [hasUnsavedChanges]="appState.hasUnsavedChanges"
+          [lastSavedAt]="appState.lastSavedAt"
+          [showFindReplace]="appState.showFindReplace"
+          [showReplace]="appState.showReplace"
+          [(findText)]="userPrefs.findText"
+          [(replaceText)]="userPrefs.replaceText"
+          [currentMatchIndex]="userPrefs.currentMatchIndex"
+          [totalMatches]="userPrefs.totalMatches"
           (contentChange)="onContentChange()"
           (insertMarkdown)="insertMarkdown($event)"
           (toggleFindReplace)="toggleFindReplace()"
@@ -200,13 +200,13 @@
         </app-markdown-editor>
 
         <!-- View Mode -->
-        <div *ngIf="!uiState.isEditMode" (mouseup)="onTextSelection()">
-          <markdown [data]="docState.selectedDocument.rawContent"></markdown>
+        <div *ngIf="!appState.isEditMode" (mouseup)="onTextSelection()">
+          <markdown [data]="appState.selectedDocument.rawContent"></markdown>
         </div>
 
         <!-- Annotations List -->
         <app-annotations-section
-          [annotations]="docState.annotations"
+          [annotations]="appState.annotations"
           (exportJSON)="exportAnnotationsAsJSON()"
           (exportCSV)="exportAnnotationsAsCSV()"
           (editAnnotation)="editAnnotation($event)"
@@ -215,8 +215,8 @@
 
         <!-- Related Documents -->
         <app-related-documents
-          *ngIf="docState.relatedDocuments.length > 0"
-          [relatedDocuments]="docState.relatedDocuments"
+          *ngIf="appState.relatedDocuments.length > 0"
+          [relatedDocuments]="appState.relatedDocuments"
           (openDocument)="closeDocument(); openDocument($event)">
         </app-related-documents>
       </div>
@@ -225,25 +225,25 @@
 </div>
 
 <!-- Annotation Dialog -->
-<div *ngIf="uiState.showAnnotationDialog" class="document-modal" (click)="closeAnnotationDialog()">
+<div *ngIf="appState.showAnnotationDialog" class="document-modal" (click)="closeAnnotationDialog()">
   <app-annotation-dialog
     (click)="$event.stopPropagation()"
-    [selectedText]="annotationState.selectedText"
-    [editingAnnotation]="annotationState.editingAnnotation"
-    [currentAnnotation]="annotationState.currentAnnotation"
-    [availableColors]="annotationState.availableColors"
+    [selectedText]="appState.selectedText"
+    [editingAnnotation]="appState.editingAnnotation"
+    [currentAnnotation]="appState.currentAnnotation"
+    [availableColors]="appState.availableColors"
     (close)="closeAnnotationDialog()"
     (save)="saveAnnotation()">
   </app-annotation-dialog>
 </div>
 
 <!-- Upload Dialog -->
-<div *ngIf="uiState.showUploadDialog" class="document-modal" (click)="closeUploadDialog()">
+<div *ngIf="appState.showUploadDialog" class="document-modal" (click)="closeUploadDialog()">
   <app-upload-dialog
     (click)="$event.stopPropagation()"
-    [dragOver]="uploadManager.dragOver"
-    [uploadProgress]="uploadManager.uploadProgress"
-    [isUploading]="uiState.isUploading"
+    [dragOver]="appManager.dragOver"
+    [uploadProgress]="appManager.uploadProgress"
+    [isUploading]="appState.isUploading"
     (close)="closeUploadDialog()"
     (dragOverEvent)="onDragOver($event)"
     (dragLeaveEvent)="onDragLeave($event)"
@@ -253,23 +253,23 @@
 </div>
 
 <!-- Settings Dialog -->
-<div *ngIf="uiState.showSettingsDialog" class="document-modal" (click)="closeSettingsDialog()">
+<div *ngIf="appState.showSettingsDialog" class="document-modal" (click)="closeSettingsDialog()">
   <app-settings-dialog
     (click)="$event.stopPropagation()"
-    [currentConfig]="settingsManager.currentConfig"
-    [(newWatchDirectory)]="settingsManager.newWatchDirectory"
+    [currentConfig]="appManager.currentConfig"
+    [(newWatchDirectory)]="appManager.newWatchDirectory"
     [totalDocuments]="totalDocuments"
     [totalWords]="totalWords"
-    [isUpdatingSettings]="uiState.isUpdatingSettings"
-    [settingsMessage]="settingsManager.settingsMessage"
-    [settingsError]="settingsManager.settingsError"
+    [isUpdatingSettings]="appState.isUpdatingSettings"
+    [settingsMessage]="appManager.settingsMessage"
+    [settingsError]="appManager.settingsError"
     (close)="closeSettingsDialog()"
     (updateWatchDirectory)="updateWatchDirectory()">
   </app-settings-dialog>
 </div>
 
 <!-- Keyboard Shortcuts Dialog -->
-<app-keyboard-shortcuts-dialog *ngIf="uiState.showKeyboardShortcutsDialog" (close)="closeKeyboardShortcuts()"></app-keyboard-shortcuts-dialog>
+<app-keyboard-shortcuts-dialog *ngIf="appState.showKeyboardShortcutsDialog" (close)="closeKeyboardShortcuts()"></app-keyboard-shortcuts-dialog>
 
 <!-- Router Outlet for Studio and other routes -->
 <router-outlet></router-outlet>

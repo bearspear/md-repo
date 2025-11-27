@@ -11,19 +11,21 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MarkdownModule } from 'ngx-markdown';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { StudioDocumentService } from '../../services/studio-document.service';
-import { SearchService } from '../../services/search.service';
+import { SearchEngineService } from '../../services/search-engine.service';
 import { ImportDocumentDialogComponent } from '../../components/import-document-dialog/import-document-dialog.component';
 import { ExportDocumentDialogComponent } from '../../components/export-document-dialog/export-document-dialog.component';
 import { ImageRepositoryService, ImageMetadata } from '../../services/image-repository.service';
 import { ImageGalleryComponent } from '../../components/image-gallery/image-gallery.component';
 import { MarkdownEditorComponent } from '../../components/markdown-editor/markdown-editor.component';
-import { DocumentThemeService, DocumentTheme } from '../../services/document-theme.service';
+import { DocumentEngineService, DocumentTheme } from '../../services/document-engine.service';
 import { EpubExportService, EpubMetadata, EpubOptions } from '../../services/epub-export.service';
 import { ThemeEditorComponent } from '../../components/theme-editor/theme-editor.component';
+import { PluginService, Plugin, PluginToolbarButton, PluginCommand, PluginExporter, wordFrequencyPlugin, readingLevelPlugin, cloudSyncPlugin } from '../../services/plugin.service';
 import mermaid from 'mermaid';
 import { Chart, registerables } from 'chart.js';
 import matter from 'gray-matter';
@@ -85,6 +87,7 @@ interface DocumentVersion {
     MatDialogModule,
     MatSnackBarModule,
     MatMenuModule,
+    MatSlideToggleModule,
     MarkdownModule,
     ImageGalleryComponent,
     MarkdownEditorComponent,
@@ -187,7 +190,10 @@ export class MarkdownStudioComponent implements OnInit, OnDestroy, AfterViewChec
     includeTableOfContents: true,
     includeCoverPage: true,
     fontSize: 'medium',
-    fontFamily: 'serif'
+    fontFamily: 'georgia',
+    theme: 'light',
+    lineHeight: 'normal',
+    textAlign: 'justify'
   };
 
   // Theme editor
@@ -210,23 +216,31 @@ export class MarkdownStudioComponent implements OnInit, OnDestroy, AfterViewChec
   // Split view mode
   splitMode: 'horizontal' | 'vertical' = 'horizontal';
 
+  // Plugin system
+  showPluginManager: boolean = false;
+  plugins: Plugin[] = [];
+  pluginToolbarButtons: PluginToolbarButton[] = [];
+  pluginCommands: PluginCommand[] = [];
+  pluginExporters: PluginExporter[] = [];
+
   constructor(
     private studioDocumentService: StudioDocumentService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
     private imageRepositoryService: ImageRepositoryService,
     private route: ActivatedRoute,
-    private searchService: SearchService,
-    private themeService: DocumentThemeService,
+    private searchService: SearchEngineService,
+    private documentEngine: DocumentEngineService,
     private renderer: Renderer2,
     private epubExportService: EpubExportService,
-    private http: HttpClient
+    private http: HttpClient,
+    private pluginService: PluginService
   ) {
     // Generate new document ID
     this.documentId = this.studioDocumentService.generateDocumentId();
 
     // Load themes
-    this.themes = this.themeService.getAllThemes();
+    this.themes = this.documentEngine.getAllThemes();
 
     // Load saved theme preference
     const savedTheme = sessionStorage.getItem('preview-theme');
@@ -267,6 +281,9 @@ export class MarkdownStudioComponent implements OnInit, OnDestroy, AfterViewChec
     if (savedSplitMode === 'vertical' || savedSplitMode === 'horizontal') {
       this.splitMode = savedSplitMode;
     }
+
+    // Initialize plugins
+    this.initializePlugins();
 
     // Load auto-saved draft if available
     this.loadAutoSavedDraft();
@@ -634,6 +651,9 @@ export class MarkdownStudioComponent implements OnInit, OnDestroy, AfterViewChec
     // Emit content changes (these are already debounced in ngOnInit)
     this.contentChange$.next(this.markdownContent);
     this.autoSave$.next();
+
+    // Trigger plugin content change hooks
+    this.triggerPluginContentChange();
 
     // Debounce undo history updates to reduce overhead
     if (this.undoDebounceTimer) {
@@ -1492,6 +1512,7 @@ Brief summary of the research (150-250 words).
           this.markdownContent = draft.content;
           this.metadata = draft.metadata || {};
           this.updatePreview(this.markdownContent);
+          this.triggerPluginLoad();
           this.showSuccess('Draft restored successfully');
         });
       }
@@ -1659,10 +1680,10 @@ Brief summary of the research (150-250 words).
    * Apply theme to preview pane
    */
   private applyPreviewTheme() {
-    const theme = this.themeService.getThemeById(this.selectedTheme);
+    const theme = this.documentEngine.getThemeById(this.selectedTheme);
     if (!theme) return;
 
-    this.previewThemeCSS = this.themeService.generatePreviewThemeCSS(theme);
+    this.previewThemeCSS = this.documentEngine.generatePreviewThemeCSS(theme);
 
     // Dynamically inject the style element
     if (this.previewContainer) {
@@ -1682,7 +1703,7 @@ Brief summary of the research (150-250 words).
    * Get selected theme object
    */
   getSelectedTheme(): DocumentTheme | undefined {
-    return this.themeService.getThemeById(this.selectedTheme);
+    return this.documentEngine.getThemeById(this.selectedTheme);
   }
 
   /**
@@ -1741,10 +1762,13 @@ Brief summary of the research (150-250 words).
    * Save document
    */
   saveDocument() {
+    // Trigger plugin before save hooks (may modify content)
+    const processedContent = this.triggerPluginBeforeSave();
+
     const document = {
       id: this.documentId,
       title: this.documentTitle,
-      content: this.markdownContent,
+      content: processedContent,
       lastModified: new Date().toISOString(),
       createdAt: new Date().toISOString() // This will be preserved by backend if it exists
     };
@@ -1754,6 +1778,9 @@ Brief summary of the research (150-250 words).
         this.lastSaved = new Date();
         this.hasUnsavedChanges = false;
         console.log('Document saved successfully:', response);
+
+        // Trigger plugin after save hooks
+        this.triggerPluginAfterSave();
       },
       error: (error) => {
         console.error('Error saving document:', error);
@@ -1895,7 +1922,7 @@ Brief summary of the research (150-250 words).
    */
   onThemeEditorSaved(theme: DocumentTheme) {
     // Reload themes to include the new custom theme
-    this.themes = this.themeService.getAllThemes();
+    this.themes = this.documentEngine.getAllThemes();
     // Add custom themes from localStorage
     try {
       const stored = localStorage.getItem('custom-themes');
@@ -1915,7 +1942,7 @@ Brief summary of the research (150-250 words).
    * Apply theme directly (for live preview from editor)
    */
   private applyThemeDirect(theme: DocumentTheme) {
-    this.previewThemeCSS = this.themeService.generatePreviewThemeCSS(theme);
+    this.previewThemeCSS = this.documentEngine.generatePreviewThemeCSS(theme);
 
     if (this.previewContainer) {
       if (this.themeStyleElement) {
@@ -2711,5 +2738,132 @@ Brief summary of the research (150-250 words).
     });
 
     this.resizingPanel = null;
+  }
+
+  // ==========================================
+  // Plugin System Methods
+  // ==========================================
+
+  /**
+   * Initialize plugins and register built-in ones
+   */
+  private initializePlugins() {
+    // Register built-in plugins
+    this.pluginService.registerPlugin(wordFrequencyPlugin);
+    this.pluginService.registerPlugin(readingLevelPlugin);
+    this.pluginService.registerPlugin(cloudSyncPlugin);
+
+    // Subscribe to plugin changes
+    this.pluginService.plugins$.pipe(takeUntil(this.destroy$)).subscribe(plugins => {
+      this.plugins = plugins;
+      this.updatePluginComponents();
+    });
+
+    // Initial update
+    this.updatePluginComponents();
+  }
+
+  /**
+   * Update plugin-provided components
+   */
+  private updatePluginComponents() {
+    this.pluginToolbarButtons = this.pluginService.getToolbarButtons();
+    this.pluginCommands = this.pluginService.getCommands();
+    this.pluginExporters = this.pluginService.getExporters();
+  }
+
+  /**
+   * Toggle plugin manager panel
+   */
+  togglePluginManager() {
+    this.showPluginManager = !this.showPluginManager;
+  }
+
+  /**
+   * Enable a plugin
+   */
+  enablePlugin(pluginId: string) {
+    this.pluginService.enablePlugin(pluginId);
+    this.showSuccess(`Plugin enabled`);
+  }
+
+  /**
+   * Disable a plugin
+   */
+  disablePlugin(pluginId: string) {
+    this.pluginService.disablePlugin(pluginId);
+    this.showSuccess(`Plugin disabled`);
+  }
+
+  /**
+   * Toggle plugin enabled state
+   */
+  togglePlugin(plugin: Plugin) {
+    if (plugin.enabled) {
+      this.disablePlugin(plugin.id);
+    } else {
+      this.enablePlugin(plugin.id);
+    }
+  }
+
+  /**
+   * Execute a plugin command
+   */
+  executePluginCommand(command: PluginCommand) {
+    try {
+      command.action();
+    } catch (error) {
+      console.error(`Error executing plugin command ${command.id}:`, error);
+      this.showError(`Failed to execute command: ${command.name}`);
+    }
+  }
+
+  /**
+   * Execute a plugin exporter
+   */
+  async executePluginExport(exporter: PluginExporter) {
+    try {
+      const blob = await exporter.export(this.markdownContent, this.documentTitle);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${this.documentTitle || 'document'}.${exporter.extension}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      this.showSuccess(`Exported as ${exporter.name}`);
+    } catch (error) {
+      console.error(`Error executing plugin export ${exporter.id}:`, error);
+      this.showError(`Failed to export: ${exporter.name}`);
+    }
+  }
+
+  /**
+   * Trigger plugin content change hooks
+   */
+  private triggerPluginContentChange() {
+    this.pluginService.triggerContentChange(this.markdownContent);
+  }
+
+  /**
+   * Trigger plugin before save hooks
+   */
+  private triggerPluginBeforeSave(): string {
+    return this.pluginService.triggerBeforeSave(this.markdownContent);
+  }
+
+  /**
+   * Trigger plugin after save hooks
+   */
+  private triggerPluginAfterSave() {
+    this.pluginService.triggerAfterSave(this.markdownContent);
+  }
+
+  /**
+   * Trigger plugin load hooks
+   */
+  private triggerPluginLoad() {
+    this.pluginService.triggerLoad(this.markdownContent);
   }
 }

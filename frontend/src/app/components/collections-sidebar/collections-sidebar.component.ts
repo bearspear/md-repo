@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
-import { CollectionService, Collection } from '../../services/collection.service';
+import { CollectionEngineService, Collection } from '../../services/collection-engine.service';
 
 @Component({
   selector: 'app-collections-sidebar',
@@ -209,7 +209,7 @@ export class CollectionsSidebarComponent implements OnInit {
   selectedCollection: Collection | null = null;
   loading = true;
 
-  constructor(private collectionService: CollectionService) {}
+  constructor(private collectionService: CollectionEngineService) {}
 
   ngOnInit() {
     this.loadCollections();

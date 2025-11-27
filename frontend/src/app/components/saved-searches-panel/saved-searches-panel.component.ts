@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SavedSearch } from '../../services/saved-searches.service';
+import { SavedSearch } from '../../services/user-preferences-engine.service';
 
 @Component({
   selector: 'app-saved-searches-panel',

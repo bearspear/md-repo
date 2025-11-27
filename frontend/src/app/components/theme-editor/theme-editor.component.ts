@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSliderModule } from '@angular/material/slider';
-import { DocumentTheme, DocumentThemeService } from '../../services/document-theme.service';
+import { DocumentTheme, DocumentEngineService } from '../../services/document-engine.service';
 
 @Component({
   selector: 'app-theme-editor',
@@ -75,7 +75,7 @@ export class ThemeEditorComponent implements OnInit {
   // Saved custom themes
   savedThemes: DocumentTheme[] = [];
 
-  constructor(private themeService: DocumentThemeService) {}
+  constructor(private documentEngine: DocumentEngineService) {}
 
   ngOnInit() {
     if (this.initialTheme) {
@@ -171,7 +171,7 @@ export class ThemeEditorComponent implements OnInit {
   }
 
   loadFromBuiltIn(themeId: string) {
-    const builtInTheme = this.themeService.getThemeById(themeId);
+    const builtInTheme = this.documentEngine.getThemeById(themeId);
     if (builtInTheme) {
       this.theme = {
         ...JSON.parse(JSON.stringify(builtInTheme)),

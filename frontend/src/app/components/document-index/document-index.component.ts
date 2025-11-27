@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { SearchResult } from '../../services/search.service';
+import { SearchResult } from '../../services/search-engine.service';
 
 @Component({
   selector: 'app-document-index',

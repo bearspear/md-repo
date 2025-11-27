@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { RecentDoc } from '../../services/recent-documents.service';
+import { RecentDoc } from '../../services/user-preferences-engine.service';
 
 @Component({
   selector: 'app-recent-documents-panel',

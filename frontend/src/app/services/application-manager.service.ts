@@ -1,7 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Annotation } from './annotation.service';
-import { SearchResult } from './search.service';
-import { DocumentThemeService, DocumentTheme } from './document-theme.service';
+import { SearchEngineService, SearchResult } from './search-engine.service';
+import { ApplicationStateService, SearchResultWithCollections } from './application-state.service';
+import { DocumentEngineService, DocumentTheme } from './document-engine.service';
+import { Annotation } from './annotation-engine.service';
+
+// ============================================
+// TYPE DEFINITIONS
+// ============================================
 
 export interface ExportData {
   document?: {
@@ -15,12 +20,214 @@ export interface ExportData {
   exportedAt: string;
 }
 
+/**
+ * Unified Application Manager Service
+ * Consolidates: UploadManagerService, SettingsManagerService, ExportManagerService, RelatedDocumentsManagerService
+ * Manages all application coordination and orchestration operations
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class ExportManagerService {
+export class ApplicationManagerService {
 
-  constructor(private themeService: DocumentThemeService) {}
+  // ============================================
+  // UPLOAD MANAGER STATE
+  // ============================================
+  uploadProgress: string[] = [];
+  dragOver = false;
+
+  // ============================================
+  // SETTINGS MANAGER STATE
+  // ============================================
+  currentConfig: any = null;
+  newWatchDirectory = '';
+  settingsMessage = '';
+  settingsError = '';
+
+  constructor(
+    private searchEngine: SearchEngineService,
+    private appState: ApplicationStateService,
+    private documentEngine: DocumentEngineService
+  ) {}
+
+  // ============================================
+  // UPLOAD MANAGER METHODS
+  // ============================================
+
+  /**
+   * Handle file input selection
+   */
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.uploadFiles(Array.from(input.files));
+    }
+  }
+
+  /**
+   * Handle drag over event
+   */
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver = true;
+  }
+
+  /**
+   * Handle drag leave event
+   */
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver = false;
+  }
+
+  /**
+   * Handle drop event
+   */
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragOver = false;
+
+    if (event.dataTransfer?.files) {
+      const mdFiles = Array.from(event.dataTransfer.files).filter(
+        file => file.name.endsWith('.md')
+      );
+      if (mdFiles.length > 0) {
+        this.uploadFiles(mdFiles);
+      }
+    }
+  }
+
+  /**
+   * Upload files to the server
+   */
+  uploadFiles(files: File[], onComplete?: () => void): void {
+    this.appState.setState('isUploading', true);
+    this.uploadProgress = [];
+
+    if (files.length === 1) {
+      const file = files[0];
+      this.uploadProgress.push(`Uploading ${file.name}...`);
+
+      this.searchEngine.uploadFile(file).subscribe({
+        next: (response) => {
+          this.uploadProgress.push(`✓ ${file.name} uploaded successfully`);
+          this.appState.setState('isUploading', false);
+          if (onComplete) {
+            onComplete();
+          }
+          setTimeout(() => this.appState.setState('showUploadDialog', false), 2000);
+        },
+        error: (error) => {
+          this.uploadProgress.push(`✗ Error uploading ${file.name}: ${error.error?.error || error.message}`);
+          this.appState.setState('isUploading', false);
+        }
+      });
+    } else {
+      this.uploadProgress.push(`Uploading ${files.length} files...`);
+
+      this.searchEngine.uploadMultipleFiles(files).subscribe({
+        next: (response) => {
+          this.uploadProgress.push(`✓ ${files.length} files uploaded successfully`);
+          this.appState.setState('isUploading', false);
+          if (onComplete) {
+            onComplete();
+          }
+          setTimeout(() => this.appState.setState('showUploadDialog', false), 2000);
+        },
+        error: (error) => {
+          this.uploadProgress.push(`✗ Error uploading files: ${error.error?.error || error.message}`);
+          this.appState.setState('isUploading', false);
+        }
+      });
+    }
+  }
+
+  /**
+   * Close upload dialog and reset state
+   */
+  closeUploadDialog(): void {
+    this.appState.setState('showUploadDialog', false);
+    this.uploadProgress = [];
+  }
+
+  // ============================================
+  // SETTINGS MANAGER METHODS
+  // ============================================
+
+  /**
+   * Open settings dialog and load current configuration
+   */
+  openSettingsDialog(): void {
+    this.appState.setState('showSettingsDialog', true);
+    this.settingsMessage = '';
+    this.settingsError = '';
+    this.loadConfig();
+  }
+
+  /**
+   * Load current configuration from server
+   */
+  loadConfig(): void {
+    this.searchEngine.getConfig().subscribe({
+      next: (config) => {
+        this.currentConfig = config;
+        this.newWatchDirectory = config.watchDirectory;
+      },
+      error: (error) => {
+        console.error('Error loading config:', error);
+        this.settingsError = 'Failed to load configuration';
+      }
+    });
+  }
+
+  /**
+   * Update watch directory and trigger re-indexing
+   */
+  updateWatchDirectory(onComplete?: () => void): void {
+    if (!this.newWatchDirectory || this.newWatchDirectory.trim().length === 0) {
+      this.settingsError = 'Please enter a valid directory path';
+      return;
+    }
+
+    this.appState.setState('isUpdatingSettings', true);
+    this.settingsError = '';
+    this.settingsMessage = '';
+
+    this.searchEngine.updateWatchDirectory(this.newWatchDirectory).subscribe({
+      next: (response) => {
+        this.settingsMessage = 'Watch directory updated successfully! Re-indexing...';
+        this.currentConfig = response.config;
+        this.appState.setState('isUpdatingSettings', false);
+        if (onComplete) {
+          onComplete();
+        }
+        setTimeout(() => {
+          this.settingsMessage = 'Configuration saved and documents re-indexed!';
+        }, 1000);
+      },
+      error: (error) => {
+        console.error('Error updating watch directory:', error);
+        this.settingsError = error.error?.error || 'Failed to update watch directory';
+        this.appState.setState('isUpdatingSettings', false);
+      }
+    });
+  }
+
+  /**
+   * Close settings dialog and reset messages
+   */
+  closeSettingsDialog(): void {
+    this.appState.setState('showSettingsDialog', false);
+    this.settingsMessage = '';
+    this.settingsError = '';
+  }
+
+  // ============================================
+  // EXPORT MANAGER METHODS
+  // ============================================
 
   /**
    * Export annotations as JSON
@@ -190,8 +397,8 @@ export class ExportManagerService {
    * Generate standalone HTML with all dependencies
    */
   private generateStandaloneHTML(content: string, title: string, themeId?: string): string {
-    const theme = themeId ? this.themeService.getThemeById(themeId) : this.themeService.getThemeById('default');
-    const themeCSS = theme ? this.themeService.generateThemeCSS(theme) : '';
+    const theme = themeId ? this.documentEngine.getThemeById(themeId) : this.documentEngine.getThemeById('default');
+    const themeCSS = theme ? this.documentEngine.generateThemeCSS(theme) : '';
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -540,5 +747,37 @@ export class ExportManagerService {
     link.download = filename;
     link.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  // ============================================
+  // RELATED DOCUMENTS MANAGER METHODS
+  // ============================================
+
+  /**
+   * Find documents related to the current document based on shared topics
+   * Scores documents by number of shared topics and returns top 5
+   */
+  findRelatedDocuments(currentTopics: string[]): void {
+    if (currentTopics.length === 0 || !this.appState.searchResults || this.appState.searchResults.length === 0) {
+      this.appState.setDocumentState('relatedDocuments', []);
+      return;
+    }
+
+    // Score documents by number of shared topics
+    const scoredDocs = this.appState.searchResults
+      .filter(doc => doc.path !== this.appState.selectedDocument?.path)
+      .map(doc => {
+        const sharedTopics = doc.topics.filter(t => currentTopics.includes(t));
+        return {
+          doc,
+          score: sharedTopics.length
+        };
+      })
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5)
+      .map(item => item.doc);
+
+    this.appState.setDocumentState('relatedDocuments', scoredDocs);
   }
 }

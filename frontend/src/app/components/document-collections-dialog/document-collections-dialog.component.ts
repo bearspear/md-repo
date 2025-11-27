@@ -5,7 +5,7 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { CollectionService, Collection } from '../../services/collection.service';
+import { CollectionEngineService, Collection } from '../../services/collection-engine.service';
 
 export interface DocumentCollectionsDialogData {
   documentPath: string;
@@ -156,7 +156,7 @@ export class DocumentCollectionsDialogComponent implements OnInit {
   constructor(
     public dialogRef: MatDialogRef<DocumentCollectionsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: DocumentCollectionsDialogData,
-    private collectionService: CollectionService
+    private collectionService: CollectionEngineService
   ) {}
 
   ngOnInit() {

@@ -10,8 +10,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { FormsModule } from '@angular/forms';
-import { ExportManagerService } from '../../services/export-manager.service';
-import { DocumentThemeService, DocumentTheme } from '../../services/document-theme.service';
+import { ApplicationManagerService } from '../../services/application-manager.service';
+import { DocumentEngineService, DocumentTheme } from '../../services/document-engine.service';
 
 interface ExportFormat {
   value: string;
@@ -66,12 +66,12 @@ export class ExportDocumentDialogComponent {
 
   constructor(
     private http: HttpClient,
-    private exportManager: ExportManagerService,
-    private themeService: DocumentThemeService,
+    private appManager: ApplicationManagerService,
+    private documentEngine: DocumentEngineService,
     public dialogRef: MatDialogRef<ExportDocumentDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ExportDialogData
   ) {
-    this.themes = this.themeService.getAllThemes();
+    this.themes = this.documentEngine.getAllThemes();
 
     // Use the preview theme if provided
     if (data.preselectedTheme) {
@@ -119,14 +119,14 @@ export class ExportDocumentDialogComponent {
         }
 
         if (this.selectedFormat === 'html') {
-          this.exportManager.exportDocumentAsHTML(
+          this.appManager.exportDocumentAsHTML(
             this.data.htmlContent,
             this.data.title || 'document',
             undefined,
             this.selectedTheme
           );
         } else {
-          this.exportManager.exportDocumentAsPDF(
+          this.appManager.exportDocumentAsPDF(
             this.data.htmlContent,
             this.data.title || 'document',
             this.selectedTheme

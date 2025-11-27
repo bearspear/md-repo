@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { Annotation } from '../../services/annotation.service';
+import { Annotation } from '../../services/annotation-engine.service';
 
 @Component({
   selector: 'app-annotations-section',

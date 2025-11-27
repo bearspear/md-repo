@@ -9,7 +9,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { Topic, Tag } from '../../services/search.service';
+import { Topic, Tag } from '../../services/search-engine.service';
 
 @Component({
   selector: 'app-search-filters-container',

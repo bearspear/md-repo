@@ -5,7 +5,7 @@ import { MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { Collection } from '../../services/collection.service';
+import { Collection } from '../../services/collection-engine.service';
 
 export interface CollectionDialogData {
   mode: 'create' | 'edit';
